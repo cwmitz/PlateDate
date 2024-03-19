@@ -1,38 +1,31 @@
-# Load the data from the csv files and process them using numpy
-import csv
-import os
 import re
 
-# This file pre-processes the data by creating an inverted index and recipe id to recipe and reviews dictionary.
-
-os.environ["ROOT_PATH"] = os.path.abspath(os.path.join("..", os.curdir))
-
-current_directory = os.path.dirname(os.path.abspath(__file__))
-
-recipes_file_path = os.path.join(current_directory, "recipes.csv")
-reviews_file_path = os.path.join(current_directory, "reviews.csv")
-
-with open(recipes_file_path, "r") as file:
-    recipes = list(csv.DictReader(file))
-
-with open(reviews_file_path, "r") as file:
-    reviews = list(csv.DictReader(file))
+import numpy as np
 
 
 def tokenize(text):
     """
-    Tokenizes the text into words and returns a list of words.
+    Tokenizes the input string into a list of words and removes any punctuation.
 
     Args:
-    text: string
+        text (str): The input string to tokenize.
 
     Returns:
-    list of words
+        list: The list of words from the input string with any punctuation removed.
     """
     return re.findall(r"[a-z]+", text.lower())
 
 
 def build_inverted_index(recipes):
+    """
+    Builds an inverted index from the input list of recipes.
+
+    Args:
+        recipes (list): The list of recipes to build the inverted index from.
+
+    Returns:
+        dict: The inverted index of the input recipes.
+    """
     inverted_index = {}
 
     for recipe in recipes:
@@ -54,27 +47,109 @@ def build_inverted_index(recipes):
     return inverted_index
 
 
-def build_id_to_recipe(recipes, reviews):
+def build_id_to_recipe(recipes):
     """
-    This just maps the recipe id to the recipe and review. We will make
-    it much nicer when we need to use it later on.
+    Builds a dictionary from recipe ID to the parts of the recipe we care about.
 
     Args:
-    recipes: list of recipes
-    reviews: list of reviews
+        recipes (list): The list of recipes to build the dictionary from.
 
     Returns:
-    dictionary of recipe id to recipe and reviews
+        dict: The dictionary from recipe ID to the parts of the recipe we care about.
     """
     id_to_recipe = {}
 
     for recipe in recipes:
         recipe_id = int(recipe["RecipeId"])
-        id_to_recipe[recipe_id] = {"recipe": recipe, "reviews": []}
+        id_to_recipe[recipe_id] = {
+            "name": recipe["Name"],
+            "description": recipe["Description"],
+            "allergy/diet": {
+                "dairy": False,
+                "egg": False,
+                "tree_nut": False,
+                "peanut": False,
+                "shellfish": False,
+                "wheat": False,
+                "soy": False,
+                "fish": False,
+                "sesame": False,
+                "gluten": False,
+                "not_vegetarian": False,
+                "not_vegan": False,
+            },
+            "cook_time": recipe["CookTime"],  # PT format
+            "prep_time": recipe["PrepTime"],  # PT format
+            "total_time": recipe["TotalTime"],  # PT format
+            "review_count": (
+                int(recipe["ReviewCount"]) if recipe["ReviewCount"] != "NA" else 0
+            ),
+            # Set to None if no ratings
+            "aggregated_rating": (
+                float(recipe["AggregatedRating"])
+                if recipe["AggregatedRating"] != "NA"
+                else None
+            ),
+            "ingredients": {},  # ingredient -> quantity
+            "instructions": [],  # list of strings
+            "yield": recipe["RecipeYield"],
+            "servings": recipe["RecipeServings"],
+        }
 
-    for review in reviews:
-        recipe_id = int(review["RecipeId"])
-        if recipe_id in id_to_recipe:
-            id_to_recipe[recipe_id]["reviews"].append(review)
+        # Add allergy/diet information
+
+        # Add ingredients
+
+        # Add instructions
 
     return id_to_recipe
+
+
+def build_idf(inverted_index, num_recipes):
+    """
+    Builds the inverse document frequency (IDF) for each term in the input inverted index.
+
+    Args:
+        inverted_index (dict): The inverted index to build the IDF from.
+        num_recipes (int): The total number of recipes in the dataset.
+
+    Returns:
+        dict: The IDF for each term in the input inverted index.
+    """
+    idf = {}
+
+    for term, postings in inverted_index.items():
+        idf[term] = np.log2(num_recipes / (len(postings) + 1))
+
+    return idf
+
+
+def build_recipe_norms(inverted_index, idf, num_recipes):
+    """
+    Precomputes the euclidean norm for each recipe.
+
+    Args:
+        inverted_index (dict): The inverted index of the dataset.
+        idf (dict): The IDF of the dataset.
+        num_recipes (int): The total number of recipes in the dataset.
+
+    Returns:
+        dict: The euclidean norm of each recipe in the dataset.
+    """
+    recipe_norms = {}
+
+    for term, postings in inverted_index.items():
+        idf_value = idf[term]
+
+        for posting in postings:
+            if posting not in recipe_norms:
+                recipe_norms[posting] = 0
+
+            recipe_norms[posting] += (idf_value**2) * (
+                1 + np.log2(num_recipes / len(postings))
+            )
+
+    for recipe_id, norm in recipe_norms.items():
+        recipe_norms[recipe_id] = np.sqrt(norm)
+
+    return recipe_norms
