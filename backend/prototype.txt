@@ -15,13 +15,14 @@ Implementation:
   - Pre-compute inverted index, idf, doc norms
   - Make a dictionary of recipe id to all of the important recipe components
 
-2. UI:
+2. Frontend:
   - Prompt user for number of people and dietary restrictions
   - Prompt user for each person's preferences
   - Display the top list of recipes (and how similar they are to each person)
   - Once you click on a recipe, it will show the recipe's details
 
 3. Algorithm:
+  - First, filter out recipes that don't fit the dietary restrictions
   - For each person, compute the cosine similarity between their preferences and each recipe
     to get a ranked list of recipes for each person
   - Use Merge-Postings algorithm to get the top recipes that are good for everyone
@@ -29,3 +30,5 @@ Implementation:
 
 Questions:
 - Should we compute term frequencies?
+- How should we do the frontend?
+- How do we get data in? Can't push it to github because it's too big of a file.

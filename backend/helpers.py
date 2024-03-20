@@ -1,4 +1,4 @@
-def alergy_diet_check(recipe):
+def dietary_restrictions_check(recipe):
     """
     TODO: Add docstring.
     """

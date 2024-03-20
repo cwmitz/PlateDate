@@ -65,7 +65,7 @@ def build_id_to_recipe(recipes):
         id_to_recipe[recipe_id] = {
             "name": recipe["Name"],
             "description": recipe["Description"],
-            "allergy/diet": helpers.alergy_diet_check(recipe),
+            "dietary_restrictions": None,  # helpers.dietary_restrictions_check(recipe),
             "cook_time": recipe["CookTime"],  # PT format
             "prep_time": recipe["PrepTime"],  # PT format
             "total_time": recipe["TotalTime"],  # PT format
@@ -77,8 +77,8 @@ def build_id_to_recipe(recipes):
                 if recipe["AggregatedRating"] != "NA"
                 else None
             ),
-            "ingredients": helpers.parse_ingredients(recipe),
-            "instructions": helpers.parse_instructions(recipe),
+            "ingredients": None,  # helpers.parse_ingredients(recipe),
+            "instructions": None,  # helpers.parse_instructions(recipe),
             "yield": recipe["RecipeYield"],
             "servings": recipe["RecipeServings"],
         }
