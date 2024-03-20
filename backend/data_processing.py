@@ -1,5 +1,6 @@
 import re
 
+import helpers
 import numpy as np
 
 
@@ -64,43 +65,23 @@ def build_id_to_recipe(recipes):
         id_to_recipe[recipe_id] = {
             "name": recipe["Name"],
             "description": recipe["Description"],
-            "allergy/diet": {
-                "dairy": False,
-                "egg": False,
-                "tree_nut": False,
-                "peanut": False,
-                "shellfish": False,
-                "wheat": False,
-                "soy": False,
-                "fish": False,
-                "sesame": False,
-                "gluten": False,
-                "not_vegetarian": False,
-                "not_vegan": False,
-            },
+            "allergy/diet": helpers.alergy_diet_check(recipe),
             "cook_time": recipe["CookTime"],  # PT format
             "prep_time": recipe["PrepTime"],  # PT format
             "total_time": recipe["TotalTime"],  # PT format
             "review_count": (
                 int(recipe["ReviewCount"]) if recipe["ReviewCount"] != "NA" else 0
             ),
-            # Set to None if no ratings
             "aggregated_rating": (
                 float(recipe["AggregatedRating"])
                 if recipe["AggregatedRating"] != "NA"
                 else None
             ),
-            "ingredients": {},  # ingredient -> quantity
-            "instructions": [],  # list of strings
+            "ingredients": helpers.parse_ingredients(recipe),
+            "instructions": helpers.parse_instructions(recipe),
             "yield": recipe["RecipeYield"],
             "servings": recipe["RecipeServings"],
         }
-
-        # Add allergy/diet information
-
-        # Add ingredients
-
-        # Add instructions
 
     return id_to_recipe
 
@@ -124,14 +105,13 @@ def build_idf(inverted_index, num_recipes):
     return idf
 
 
-def build_recipe_norms(inverted_index, idf, num_recipes):
+def build_recipe_norms(inverted_index, idf):
     """
     Precomputes the euclidean norm for each recipe.
 
     Args:
         inverted_index (dict): The inverted index of the dataset.
         idf (dict): The IDF of the dataset.
-        num_recipes (int): The total number of recipes in the dataset.
 
     Returns:
         dict: The euclidean norm of each recipe in the dataset.
@@ -145,9 +125,7 @@ def build_recipe_norms(inverted_index, idf, num_recipes):
             if posting not in recipe_norms:
                 recipe_norms[posting] = 0
 
-            recipe_norms[posting] += (idf_value**2) * (
-                1 + np.log2(num_recipes / len(postings))
-            )
+            recipe_norms[posting] += idf_value**2
 
     for recipe_id, norm in recipe_norms.items():
         recipe_norms[recipe_id] = np.sqrt(norm)

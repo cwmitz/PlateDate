@@ -1,0 +1,31 @@
+Overview:
+
+1. Users input how many people and dietary restrictions they have
+
+2. A form is prompted for each person. The form has:
+  - Text prompt to describe what they want to eat
+  - Nothing else (for now)
+
+3. Algorithm computes the best recipes that suits everyone's preferences (and dietary restrictions)
+
+
+Implementation:
+
+1. Data pre-processing:
+  - Pre-compute inverted index, idf, doc norms
+  - Make a dictionary of recipe id to all of the important recipe components
+
+2. UI:
+  - Prompt user for number of people and dietary restrictions
+  - Prompt user for each person's preferences
+  - Display the top list of recipes (and how similar they are to each person)
+  - Once you click on a recipe, it will show the recipe's details
+
+3. Algorithm:
+  - For each person, compute the cosine similarity between their preferences and each recipe
+    to get a ranked list of recipes for each person
+  - Use Merge-Postings algorithm to get the top recipes that are good for everyone
+
+
+Questions:
+- Should we compute term frequencies?
