@@ -64,17 +64,35 @@ def cosine_similarity(query, inverted_index, idf, recipe_norms):
     return cosine_scores
 
 
-def merge_postings(cosine_scores):
+def common_recipes(cosine_scores_all):
     """
-    TODO: Add docstring.
+    Gets the top 10 most common recipes from the cosine similarity scores of
+    all queries.
+
+    Args:
+        cosine_scores_all (list): List of cosine similarity scores for each query.
+
+    Returns:
+        top_10_recipes (list): The top 10 most common recipes from the cosine similarity scores.
     """
-    raise NotImplementedError
+    # Dictionary to store accumulated ranks of each recipe
+    accumulated_ranks = {}
+
+    # Accumulate ranks of each recipe
+    for cosine_scores in cosine_scores_all:
+        for rank, (recipe_id, _) in enumerate(cosine_scores):
+            accumulated_ranks[recipe_id] = accumulated_ranks.get(recipe_id, 0) + rank
+
+    # Sort the accumulated ranks in increasing order
+    top_10_recipes = sorted(accumulated_ranks.items(), key=lambda x: x[1])[:10]
+
+    return top_10_recipes
 
 
 def algorithm(queries, inverted_index, idf, recipe_norms):
     """
-    Runs cosine similarity for each query and then runs Merge-Postings on the
-    resulting recipe IDs, returning the top 10 recipes in common for all queries.
+    Runs cosine similarity for each query and then calculates the most common
+    recipes from the results.
 
     Args:
         queries (list): List of input queries to search for.
@@ -90,7 +108,5 @@ def algorithm(queries, inverted_index, idf, recipe_norms):
         cosine_similarity(query, inverted_index, idf, recipe_norms) for query in queries
     ]
 
-    # Run Merge-Postings on the resulting recipe IDs
-    common_recipes = merge_postings(cosine_scores)
-
-    return common_recipes[:10]
+    # Get the top 10 most common recipes from the cosine similarity scores
+    return common_recipes(cosine_scores)

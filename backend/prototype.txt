@@ -25,7 +25,7 @@ Implementation:
   - First, filter out recipes that don't fit the dietary restrictions
   - For each person, compute the cosine similarity between their preferences and each recipe
     to get a ranked list of recipes for each person
-  - Use Merge-Postings algorithm to get the top recipes that are good for everyone
+  - Use Merge-Postings algorithm to get the top recipes that are good for everyone (NOT MERGE-POSTINGS I THINK)
 
 
 Questions:
