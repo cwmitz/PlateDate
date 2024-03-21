@@ -80,7 +80,7 @@ def home():
 @app.route("/recipes")
 def episodes_search():
     text = request.args.get("title")
-    return cosine_search(text)
+    return cosine_search([text])
 
 
 if "DB_NAME" not in os.environ:
