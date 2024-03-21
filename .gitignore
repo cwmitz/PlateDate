@@ -20,4 +20,5 @@ helpers/*
 json_template/
 
 platedate/
-backend/recipes.csv
+backend/data/recipes.csv
+backend/data/id_to_recipe.json
