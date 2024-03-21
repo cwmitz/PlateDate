@@ -1,3 +1,5 @@
+import re
+
 def dietary_restrictions_check(recipe):
     """
     TODO: Add docstring.
@@ -10,10 +12,13 @@ def parse_ingredients(recipe):
     TODO: Add docstring.
     """
     raise NotImplementedError
+    # ingredients = recipe["RecipeIngredientParts"]
 
 
 def parse_instructions(recipe):
     """
-    TODO: Add docstring.
+    Takes in the recipe and returns a list of the steps in the recipe.
     """
-    raise NotImplementedError
+    instructions = recipe["RecipeInstructions"]
+    steps = re.findall(r'"(.*?)"', instructions)
+    return steps

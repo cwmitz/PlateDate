@@ -1,6 +1,6 @@
 import re
 
-import helpers
+import recipe_parser
 import numpy as np
 
 
@@ -78,7 +78,7 @@ def build_id_to_recipe(recipes):
                 else None
             ),
             "ingredients": None,  # helpers.parse_ingredients(recipe),
-            "instructions": None,  # helpers.parse_instructions(recipe),
+            "instructions": recipe_parser.parse_instructions(recipe),
             "yield": recipe["RecipeYield"],
             "servings": recipe["RecipeServings"],
         }
