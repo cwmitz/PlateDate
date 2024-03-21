@@ -24,11 +24,11 @@
 
     <script>
 
-        function answerBoxTemplate(title, titleDesc, rating) {
+        function answerBoxTemplate(name, instructions, aggregatedRating) {
             return `<div class=''>
-                <h3 class='episode-title'>${title}</h3>
-                <p class='episode-desc'>${titleDesc}</p>
-                <p class='episode-rating'>IMDB Rating: ${rating}</p>
+                <h3 class='recipe-name'>${name}</h3>
+                <p class='recipe-instructions'>${instructions}</p>
+                <p class='recipe-rating'>Rating: ${aggregatedRating}</p>
             </div>`
         }
 
@@ -39,12 +39,12 @@
         function filterText() {
             document.getElementById("answer-box").innerHTML = ""
             console.log(document.getElementById("filter-text-val").value)
-            fetch("/episodes?" + new URLSearchParams({ title: document.getElementById("filter-text-val").value }).toString())
+            fetch("/recipes?" + new URLSearchParams({ title: document.getElementById("filter-text-val").value }).toString())
                 .then((response) => response.json())
                 .then((data) => data.forEach(row => {
 
                     let tempDiv = document.createElement("div")
-                    tempDiv.innerHTML = answerBoxTemplate(row.title, row.descr, row.imdb_rating)
+                    tempDiv.innerHTML = answerBoxTemplate(row.name, row.instructions, row.aggregated_rating)
                     document.getElementById("answer-box").appendChild(tempDiv)
                 }));
 

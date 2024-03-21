@@ -20,7 +20,8 @@ def accumulate_dot_scores(query_set, inverted_index, idf):
     for term in query_set:
         if term in inverted_index:
             for recipe_id in inverted_index[term]:
-                dot_scores[recipe_id] = dot_scores.get(recipe_id, 0) + idf[term]
+                dot_scores[int(recipe_id)] = dot_scores.get(
+                    int(recipe_id), 0) + idf[term]
 
     return dot_scores
 
@@ -55,7 +56,8 @@ def cosine_similarity(query, inverted_index, idf, recipe_norms):
     cosine_scores = []
     for recipe_id, dot_score in dot_scores.items():
         cosine_scores.append(
-            (recipe_id, dot_score / (query_norm * recipe_norms[recipe_id]))
+            (int(recipe_id), dot_score /
+             (query_norm * recipe_norms[int(recipe_id)]))
         )
 
     # Sort the cosine similarity scores in decreasing order
@@ -81,7 +83,8 @@ def common_recipes(cosine_scores_all):
     # Accumulate ranks of each recipe
     for cosine_scores in cosine_scores_all:
         for rank, (recipe_id, _) in enumerate(cosine_scores):
-            accumulated_ranks[recipe_id] = accumulated_ranks.get(recipe_id, 0) + rank
+            accumulated_ranks[int(recipe_id)] = accumulated_ranks.get(
+                int(recipe_id), 0) + rank
 
     # Sort the accumulated ranks in increasing order
     top_10_recipes = sorted(accumulated_ranks.items(), key=lambda x: x[1])[:10]
