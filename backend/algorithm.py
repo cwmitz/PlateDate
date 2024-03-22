@@ -61,7 +61,7 @@ def cosine_similarity(query, inverted_index, idf, recipe_norms):
         )
 
     # Sort the cosine similarity scores in decreasing order
-    cosine_scores.sort(key=lambda x: x[1], reverse=True)
+    # cosine_scores.sort(key=lambda x: x[1], reverse=True)
 
     return cosine_scores
 
@@ -82,12 +82,14 @@ def common_recipes(cosine_scores_all):
 
     # Accumulate ranks of each recipe
     for cosine_scores in cosine_scores_all:
-        for rank, (recipe_id, _) in enumerate(cosine_scores):
-            accumulated_ranks[int(recipe_id)] = accumulated_ranks.get(
-                int(recipe_id), 0) + rank
-
+        for (recipe_id, score) in cosine_scores:
+            if recipe_id in accumulated_ranks:
+                accumulated_ranks[recipe_id] += score
+            else:
+                accumulated_ranks[recipe_id] = score
     # Sort the accumulated ranks in increasing order
-    top_10_recipes = sorted(accumulated_ranks.items(), key=lambda x: x[1])[:10]
+    top_10_recipes = sorted(accumulated_ranks.items(),
+                            key=lambda x: x[1], reverse=True)[:10]
 
     return top_10_recipes
 
