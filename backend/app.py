@@ -67,20 +67,16 @@ def cosine_search(queries):
     return json.dumps(details, indent=4)
 
 
-queries = ["lemon dessert"]
-s = cosine_search(queries)
-# print(s)
-
-
 @app.route("/")
 def home():
     return render_template("base.html", title="sample html")
 
 
 @app.route("/recipes")
-def episodes_search():
-    text = request.args.get("title")
-    return cosine_search([text])
+def recipes_search():
+    texts = request.args.getlist("title")
+    search_results = cosine_search(texts)
+    return search_results
 
 
 if "DB_NAME" not in os.environ:

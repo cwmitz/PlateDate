@@ -12,43 +12,75 @@
             <div class="google-colors">
                 <h1 id="google-3">PlateDate</h1>
             </div>
-            <div class="input-box" onclick="sendFocus()">
-                <img src="{{ url_for('static', filename='images/mag.png') }}" />
-                <input placeholder="What do you want to eat?" id="filter-text-val" onkeyup="filterText()">
+            <div class="dropdown-and-search-container"
+                style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
+                <label for="number-select" style="margin-bottom: 10px;">How many people are you cooking with?</label>
+                <div id="dropdown-menu" style="display: flex; justify-content: center; align-items: center;">
+                    <select id="number-select">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                    <button onclick="generateSearchBars()">Enter</button>
+                </div>
             </div>
+            <div id="search-bars-container"></div>
         </div>
-        <div id="answer-box">
-
-        </div>
+        <div id="answer-box"></div>
     </div>
 
     <script>
+        function generateSearchBars() {
+            const numberOfSearchBars = document.getElementById('number-select').value;
+            const container = document.getElementById('search-bars-container');
+            container.innerHTML = ''; // Clear the container before adding new search bars
 
-        function answerBoxTemplate(name, instructions, aggregatedRating) {
-            return `<div class=''>
-                <h3 class='recipe-name'>${name}</h3>
-                <p class='recipe-instructions'>${instructions}</p>
-                <p class='recipe-rating'>Rating: ${aggregatedRating}</p>
-            </div>`
-        }
+            for (let i = 0; i < numberOfSearchBars; i++) {
+                const searchBoxDiv = document.createElement('div');
+                searchBoxDiv.classList.add('input-box');
 
-        function sendFocus() {
-            document.getElementById('filter-text-val').focus()
+                const searchInput = document.createElement('input');
+                searchInput.placeholder = "What do you want to eat?";
+                searchInput.setAttribute("onkeyup", "filterText()");
+
+                const searchIcon = document.createElement('img');
+                searchIcon.src = "{{ url_for('static', filename='images/mag.png') }}";
+
+                searchBoxDiv.appendChild(searchIcon);
+                searchBoxDiv.appendChild(searchInput);
+                container.appendChild(searchBoxDiv);
+            }
         }
 
         function filterText() {
-            document.getElementById("answer-box").innerHTML = ""
-            console.log(document.getElementById("filter-text-val").value)
-            fetch("/recipes?" + new URLSearchParams({ title: document.getElementById("filter-text-val").value }).toString())
-                .then((response) => response.json())
-                .then((data) => data.forEach(row => {
+            const searchInputs = document.querySelectorAll('#search-bars-container input');
+            const titles = Array.from(searchInputs).map(input => input.value).filter(value => value.trim() !== "");
 
-                    let tempDiv = document.createElement("div")
-                    tempDiv.innerHTML = answerBoxTemplate(row.name, row.instructions, row.aggregated_rating)
-                    document.getElementById("answer-box").appendChild(tempDiv)
-                }));
+            // Constructing the query string manually to accommodate multiple values for 'title'
+            const queryString = titles.map(title => `title=${encodeURIComponent(title)}`).join('&');
 
+            document.getElementById("answer-box").innerHTML = "";
+            if (titles.length > 0) {
+                fetch(`/recipes?${queryString}`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        data.forEach(row => {
+                            let tempDiv = document.createElement("div");
+                            tempDiv.innerHTML = answerBoxTemplate(row.name, row.instructions, row.aggregated_rating);
+                            document.getElementById("answer-box").appendChild(tempDiv);
+                        });
+                    });
+            }
         }
 
+        function answerBoxTemplate(name, instructions, aggregatedRating) {
+            return `<div class=''>
+                    <h3 class='recipe-name'>${name}</h3>
+                    <p class='recipe-instructions'>${instructions}</p>
+                    <p class='recipe-rating'>Rating: ${aggregatedRating}</p>
+                </div>`;
+        }
     </script>
 </body>
