@@ -68,16 +68,16 @@
                     .then((data) => {
                         data.forEach(row => {
                             let tempDiv = document.createElement("div");
-                            tempDiv.innerHTML = answerBoxTemplate(row.name, row.instructions, row.aggregated_rating);
+                            tempDiv.innerHTML = answerBoxTemplate(row.name, row.instructions, row.aggregated_rating, row.Url);
                             document.getElementById("answer-box").appendChild(tempDiv);
                         });
                     });
             }
         }
 
-        function answerBoxTemplate(name, instructions, aggregatedRating) {
+        function answerBoxTemplate(name, instructions, aggregatedRating, Url) {
             return `<div class=''>
-                    <h3 class='recipe-name'>${name}</h3>
+                <h3 class='recipe-name'><a href="${Url}" target="_blank">${name}</a></h3>
                     <p class='recipe-instructions'>${instructions}</p>
                     <p class='recipe-rating'>Rating: ${aggregatedRating}</p>
                 </div>`;
