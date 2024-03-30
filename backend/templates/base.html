@@ -76,10 +76,21 @@
         }
 
         function answerBoxTemplate(name, instructions, aggregatedRating, Url) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= Math.floor(aggregatedRating)) {
+                    stars += `<span style="color: black;">★</span>`;
+                } else if (i === Math.ceil(aggregatedRating) && aggregatedRating % 1 !== 0) {
+                    stars += '1/2';
+
+                } else {
+                    stars += `<span style="color: black;">☆</span>`;
+                }
+            }
             return `<div class=''>
                 <h3 class='recipe-name'><a href="${Url}" target="_blank">${name}</a></h3>
                     <p class='recipe-instructions'>${instructions}</p>
-                    <p class='recipe-rating'>Rating: ${aggregatedRating}</p>
+                    <p class='recipe-rating'>Rating: ${stars}</p>
                 </div>`;
         }
     </script>
