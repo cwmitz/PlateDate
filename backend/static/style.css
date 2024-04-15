@@ -82,7 +82,7 @@
     flex-direction: column; 
 }
 
-.dietary-restrictions {
+.specifications {
     display: flex;
     justify-content: center;
     align-items: center;

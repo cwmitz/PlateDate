@@ -11,7 +11,16 @@
         <div class="title-font">
             <h1 id="title">PlateDate</h1>
         </div>
-        <div class="dietary-restrictions">
+        <div class="specifications">
+            <p>How much time do you have to cook?</p>
+        </div>
+        <div class="specifications">
+            <div class="sliding-time">
+                <input type="range" min="0" max="240" value="60" class="slider" id="time-slider">
+                <p id="time-output">60 minutes</p>               
+            </div>
+        </div> 
+        <div class="specifications">
             <label>Indicate any dietary restrictions: </label>
             <div class="checkbox-container">
                 <input type="checkbox" id="vegetarian" name="vegetarian">
@@ -42,6 +51,12 @@
     </div>
 
     <script>
+        const timeSlider = document.getElementById("time-slider");
+        const timeOutput = document.getElementById("time-output");
+        timeOutput.innerHTML = timeSlider.value + " minutes";
+        timeSlider.oninput = function() {
+           timeOutput.innerHTML = this.value + " minutes";}
+
         function generateSearchBars() {
             const numberOfSearchBars = document.getElementById('number-select').value;
             const container = document.getElementById('search-bars-container');
