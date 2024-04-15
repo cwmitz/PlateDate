@@ -77,7 +77,7 @@ def build_id_to_recipe(recipes):
                 if recipe["AggregatedRating"] != "NA"
                 else None
             ),
-            "ingredients": None,  # helpers.parse_ingredients(recipe),
+            "ingredients": recipe_parser.parse_ingredients(recipe),
             "instructions": recipe_parser.parse_instructions(recipe),
             "yield": recipe["RecipeYield"],
             "servings": recipe["RecipeServings"],
