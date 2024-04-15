@@ -60,6 +60,7 @@ def cosine_search(queries):
         {"name": id_to_recipe[str(recipe_id)]["name"],
          "instructions": id_to_recipe[str(recipe_id)]["instructions"],
          "aggregated_rating": id_to_recipe[str(recipe_id)]["aggregated_rating"],
+         "image": id_to_recipe[str(recipe_id)]["image"],
          "Url": id_to_recipe[str(recipe_id)]["Url"]
          }
         for recipe_id in top_10_ids if str(recipe_id) in id_to_recipe

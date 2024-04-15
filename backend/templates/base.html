@@ -78,26 +78,27 @@
                     .then((data) => {
                         data.forEach(row => {
                             let tempDiv = document.createElement("div");
-                            tempDiv.innerHTML = answerBoxTemplate(row.name, row.instructions, row.aggregated_rating, row.Url);
+                            tempDiv.innerHTML = answerBoxTemplate(row.name, row.instructions, row.aggregated_rating, row.image, row.Url);
                             document.getElementById("answer-box").appendChild(tempDiv);
                         });
                     });
             }
         }
 
-        function answerBoxTemplate(name, instructions, aggregatedRating, Url) {
+        function answerBoxTemplate(name, instructions, aggregatedRating, image, Url) {
             let stars = '';
             for (let i = 1; i <= 5; i++) {
                 if (i <= Math.floor(aggregatedRating)) {
                     stars += `<span style="color: black;">★</span>`;
                 } else if (i === Math.ceil(aggregatedRating) && aggregatedRating % 1 !== 0) {
-                    stars += '1/2';
+                    stars += '½';
 
                 } else {
                     stars += `<span style="color: black;">☆</span>`;
                 }
             }
             return `<div class=''>
+                <img src="${image}" alt=" " style="width: 100px; height: 100px; margin-right: 10px;">
                 <h3 class='recipe-name'><a href="${Url}" target="_blank">${name}</a></h3>
                     <p class='recipe-instructions'>${instructions}</p>
                     <p class='recipe-rating'>Rating: ${stars}</p>
