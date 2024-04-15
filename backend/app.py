@@ -3,7 +3,7 @@ import os
 import algorithm
 
 import pandas as pd
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from helpers.MySQLDatabaseHandler import MySQLDatabaseHandler
 from pathlib import Path
@@ -51,7 +51,7 @@ with open(id_to_recipe_path, 'r') as f:
 
 
 def cosine_search(queries):
-    top_10_recipes = algorithm.algorithm(
+    top_10_recipes, sim_scores = algorithm.algorithm(
         queries, inverted_index, idf, recipe_norms)
 
     top_10_ids = [recipe_id for recipe_id, _ in top_10_recipes]
@@ -61,12 +61,13 @@ def cosine_search(queries):
          "instructions": id_to_recipe[str(recipe_id)]["instructions"],
          "aggregated_rating": id_to_recipe[str(recipe_id)]["aggregated_rating"],
          "image": id_to_recipe[str(recipe_id)]["image"],
-         "Url": id_to_recipe[str(recipe_id)]["Url"]
+         "Url": id_to_recipe[str(recipe_id)]["Url"],
+         "similarity_scores": sim_scores[recipe_id]
          }
         for recipe_id in top_10_ids if str(recipe_id) in id_to_recipe
     ]
 
-    return json.dumps(details, indent=4)
+    return details
 
 
 @app.route("/")
@@ -78,7 +79,7 @@ def home():
 def recipes_search():
     texts = request.args.getlist("title")
     search_results = cosine_search(texts)
-    return search_results
+    return jsonify(search_results)
 
 
 if "DB_NAME" not in os.environ:

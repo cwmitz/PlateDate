@@ -37,7 +37,7 @@ def cosine_similarity(query, inverted_index, idf, recipe_norms):
         recipe_norms (dict): The euclidean norm of each recipe in the dataset.
 
     Returns:
-        cosine_scores (list): Sorted (decreasing) list of (recipe ID, cosine similarity score) pairs.
+        cosine_scores (list): List of (recipe ID, cosine similarity score) pairs.
     """
     # Tokenize the input query
     query_set = data_processing.tokenize(query)
@@ -59,9 +59,6 @@ def cosine_similarity(query, inverted_index, idf, recipe_norms):
             (int(recipe_id), dot_score /
              (query_norm * recipe_norms[int(recipe_id)]))
         )
-
-    # Sort the cosine similarity scores in decreasing order
-    # cosine_scores.sort(key=lambda x: x[1], reverse=True)
 
     return cosine_scores
 
@@ -94,6 +91,25 @@ def common_recipes(cosine_scores_all):
     return top_10_recipes
 
 
+def get_sim_scores(top_recipes, cosine_scores_all, num_queries):
+    """
+    Modifies the scores dictionary to include a score for every query for each recipe.
+    If a recipe does not have a score for a particular query, it is assumed to be zero.
+    """
+    # Get recipe IDs from top recipes
+    top_ids = {recipe_id for recipe_id, _ in top_recipes}
+    # Initialize dictionary to store scores with a list containing zeros initially for each query
+    scores = {recipe_id: [0]*num_queries for recipe_id in top_ids}
+
+    for query_index, s in enumerate(cosine_scores_all):
+        for recipe_id, score in s:
+            if recipe_id in scores:
+                # Replace the zero at the query index with the actual score
+                scores[recipe_id][query_index] = score
+
+    return scores
+
+
 def algorithm(queries, inverted_index, idf, recipe_norms):
     """
     Runs cosine similarity for each query and then calculates the most common
@@ -113,5 +129,9 @@ def algorithm(queries, inverted_index, idf, recipe_norms):
         cosine_similarity(query, inverted_index, idf, recipe_norms) for query in queries
     ]
 
+    top_recipes = common_recipes(cosine_scores)
+
+    num_queries = len(queries)
+
     # Get the top 10 most common recipes from the cosine similarity scores
-    return common_recipes(cosine_scores)
+    return top_recipes, get_sim_scores(top_recipes, cosine_scores, num_queries)

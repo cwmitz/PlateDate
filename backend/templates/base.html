@@ -76,33 +76,38 @@
                 fetch(`/recipes?${queryString}`)
                     .then((response) => response.json())
                     .then((data) => {
-                        data.forEach(row => {
-                            let tempDiv = document.createElement("div");
-                            tempDiv.innerHTML = answerBoxTemplate(row.name, row.instructions, row.aggregated_rating, row.image, row.Url);
-                            document.getElementById("answer-box").appendChild(tempDiv);
-                        });
+                        displayRecipes(data);
                     });
             }
         }
 
-        function answerBoxTemplate(name, instructions, aggregatedRating, image, Url) {
+        function displayRecipes(recipes) {
+            const answerBox = document.getElementById('answer-box');
+            answerBox.innerHTML = ''; //do i need this??????????????????????
+            recipes.forEach((recipe) => {
+                let tempDiv = document.createElement("div");
+                let similarityScoresHTML = '';
+                console.log("Sim Scores:", recipe.similarity_scores);
+                recipe.similarity_scores.forEach((score, index) => {
+                    similarityScoresHTML += `<p>Query #${index + 1} Similarity: ${score.toFixed(2)}</p>`;
+                });
+                tempDiv.innerHTML = `
+                    <img src="${recipe.image}" alt="${recipe.name}" style="width: 100px; height: 100px; margin-right: 10px;">
+                    <h3><a href="${recipe.Url}" target="_blank">${recipe.name}</a></h3>
+                    <p>${recipe.instructions}</p>
+                    ${similarityScoresHTML}
+                    <p>Rating: ${generateStars(recipe.aggregated_rating)}</p>
+                `;
+                answerBox.appendChild(tempDiv);
+            });
+        }
+
+        function generateStars(rating) {
             let stars = '';
             for (let i = 1; i <= 5; i++) {
-                if (i <= Math.floor(aggregatedRating)) {
-                    stars += `<span style="color: black;">★</span>`;
-                } else if (i === Math.ceil(aggregatedRating) && aggregatedRating % 1 !== 0) {
-                    stars += '½';
-
-                } else {
-                    stars += `<span style="color: black;">☆</span>`;
-                }
+                stars += i <= Math.floor(rating) ? '★' : '☆';
             }
-            return `<div class=''>
-                <img src="${image}" alt=" " style="width: 100px; height: 100px; margin-right: 10px;">
-                <h3 class='recipe-name'><a href="${Url}" target="_blank">${name}</a></h3>
-                    <p class='recipe-instructions'>${instructions}</p>
-                    <p class='recipe-rating'>Rating: ${stars}</p>
-                </div>`;
+            return stars;
         }
     </script>
 </body>
