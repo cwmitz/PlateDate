@@ -1,7 +1,7 @@
 import re
 
-import recipe_parser
 import numpy as np
+import recipe_parser
 
 
 def tokenize(text):
@@ -65,7 +65,7 @@ def build_id_to_recipe(recipes):
         id_to_recipe[recipe_id] = {
             "name": recipe["Name"],
             "description": recipe["Description"],
-            "dietary_restrictions": None,  # helpers.dietary_restrictions_check(recipe),
+            "dietary_restrictions": recipe_parser.dietary_restrictions_check(recipe),
             "cook_time": recipe["CookTime"],  # PT format
             "prep_time": recipe["PrepTime"],  # PT format
             "total_time": recipe["TotalTime"],  # PT format
@@ -81,6 +81,7 @@ def build_id_to_recipe(recipes):
             "instructions": recipe_parser.parse_instructions(recipe),
             "yield": recipe["RecipeYield"],
             "servings": recipe["RecipeServings"],
+            "image": recipe_parser.parse_image(recipe),
         }
 
     return id_to_recipe

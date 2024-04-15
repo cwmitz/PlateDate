@@ -24,6 +24,22 @@ def parse_ingredients(recipe):
     return ingredients
 
 
+def parse_image(recipe):
+    """
+    Image url is stored in a R format of c(<list of urls>). This function extracts
+    the first url from the list.
+
+    Args:
+        recipe (dict): The recipe dictionary.
+
+    Returns:
+        str: The url of the image.
+    """
+    image = recipe["Images"]
+    image = re.findall(r'"(.*?)"', image)
+    return image[0] if image else None
+
+
 def parse_instructions(recipe):
     """
     Takes in the recipe and returns a string of the instruction steps with a space after each period.
