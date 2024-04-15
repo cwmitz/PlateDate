@@ -17,9 +17,9 @@
         <div class="specifications">
             <div class="sliding-time">
                 <input type="range" min="0" max="240" value="60" class="slider" id="time-slider">
-                <p id="time-output">60 minutes</p>               
+                <p id="time-output">60 minutes</p>
             </div>
-        </div> 
+        </div>
         <div class="specifications">
             <label>Indicate any dietary restrictions: </label>
             <div class="checkbox-container">
@@ -50,17 +50,19 @@
         <div id="answer-box"></div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const timeSlider = document.getElementById("time-slider");
         const timeOutput = document.getElementById("time-output");
         timeOutput.innerHTML = timeSlider.value + " minutes";
-        timeSlider.oninput = function() {
-           timeOutput.innerHTML = this.value + " minutes";}
+        timeSlider.oninput = function () {
+            timeOutput.innerHTML = this.value + " minutes";
+        }
 
         function generateSearchBars() {
             const numberOfSearchBars = document.getElementById('number-select').value;
             const container = document.getElementById('search-bars-container');
-            container.innerHTML = ''; // Clear the container before adding new search bars
+            container.innerHTML = '';
 
             for (let i = 0; i < numberOfSearchBars; i++) {
                 const searchBoxDiv = document.createElement('div');
@@ -79,11 +81,11 @@
             }
         }
 
+        var titles = []; // Global variable to hold titles
+
         function filterText() {
             const searchInputs = document.querySelectorAll('#search-bars-container input');
-            const titles = Array.from(searchInputs).map(input => input.value).filter(value => value.trim() !== "");
-
-            // Constructing the query string manually to accommodate multiple values for 'title'
+            titles = Array.from(searchInputs).map(input => input.value).filter(value => value.trim() !== "");
             const queryString = titles.map(title => `title=${encodeURIComponent(title)}`).join('&');
 
             document.getElementById("answer-box").innerHTML = "";
@@ -92,29 +94,80 @@
                     .then((response) => response.json())
                     .then((data) => {
                         displayRecipes(data);
+                        titles = titles; // Make sure to update titles globally or pass to displayRecipes if needed
                     });
             }
         }
 
         function displayRecipes(recipes) {
             const answerBox = document.getElementById('answer-box');
-            recipes.forEach((recipe) => {
+            recipes.forEach((recipe, index) => {
                 let tempDiv = document.createElement("div");
-                let similarityScoresHTML = '';
-                console.log("Sim Scores:", recipe.similarity_scores);
-                recipe.similarity_scores.forEach((score, index) => {
-                    similarityScoresHTML += `<p>Query #${index + 1} Similarity: ${score.toFixed(2)}</p>`;
-                });
                 tempDiv.innerHTML = `
-                    <img src="${recipe.image}" alt="${recipe.name}" style="width: 100px; height: 100px; margin-right: 10px;">
-                    <h3><a href="${recipe.Url}" target="_blank">${recipe.name}</a></h3>
-                    <p>${recipe.instructions}</p>
-                    ${similarityScoresHTML}
-                    <p>Rating: ${generateStars(recipe.aggregated_rating)}</p>
-                `;
+        <img src="${recipe.image}" alt="${recipe.name}" style="width: 100px; height: 100px; margin-right: 10px;">
+        <h3><a href="${recipe.url}" target="_blank">${recipe.name}</a></h3>
+        <p>${recipe.instructions}</p>
+        <h4>Query Relevance</h4>
+        <canvas id="pieChart-${index}" width="100" height="100"></canvas>
+        <p>Rating: ${generateStars(recipe.aggregated_rating)}</p>
+    `;
                 answerBox.appendChild(tempDiv);
+                createPieChart(recipe.similarity_scores, titles, index); // Now passing titles as well
             });
         }
+
+        function createPieChart(similarityScores, titles, chartIndex) {
+            const ctx = document.getElementById(`pieChart-${chartIndex}`).getContext('2d');
+            const data = {
+                labels: similarityScores.map((_, i) => `Query #${i + 1}`),
+                datasets: [{
+                    label: 'Similarity Score',
+                    data: similarityScores,
+                    backgroundColor: [
+                        'rgba(150, 111, 51, 1)',
+                        'rgba(205, 133, 63, 1)',
+                        'rgba(139, 69, 19, 1)',
+                        'rgba(222, 184, 135, 1)',
+                        'rgba(160, 82, 45, 1)',
+                        'rgba(210, 180, 140, 1)'
+                    ],
+                    borderColor: [
+                        'rgba(150, 111, 51, 1)',
+                        'rgba(205, 133, 63, 1)',
+                        'rgba(139, 69, 19, 1)',
+                        'rgba(222, 184, 135, 1)',
+                        'rgba(160, 82, 45, 1)',
+                        'rgba(210, 180, 140, 1)'
+                    ]
+                    ,
+                    borderWidth: 1
+                }]
+            };
+
+            const config = {
+                type: 'pie',
+                data: data,
+                options: {
+                    responsive: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (tooltipItem) {
+                                    const query = titles[tooltipItem.dataIndex];
+                                    const score = tooltipItem.raw.toFixed(2);
+                                    return [`${query ? `"${query}"` : "Unknown Query"}`, `${score}`];
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            new Chart(ctx, config);
+        }
+
 
         function generateStars(rating) {
             let stars = '';
