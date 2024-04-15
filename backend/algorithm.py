@@ -20,8 +20,9 @@ def accumulate_dot_scores(query_set, inverted_index, idf):
     for term in query_set:
         if term in inverted_index:
             for recipe_id in inverted_index[term]:
-                dot_scores[int(recipe_id)] = dot_scores.get(
-                    int(recipe_id), 0) + idf[term]
+                dot_scores[int(recipe_id)] = (
+                    dot_scores.get(int(recipe_id), 0) + idf[term]
+                )
 
     return dot_scores
 
@@ -56,8 +57,7 @@ def cosine_similarity(query, inverted_index, idf, recipe_norms):
     cosine_scores = []
     for recipe_id, dot_score in dot_scores.items():
         cosine_scores.append(
-            (int(recipe_id), dot_score /
-             (query_norm * recipe_norms[int(recipe_id)]))
+            (int(recipe_id), dot_score / (query_norm * recipe_norms[int(recipe_id)]))
         )
 
     return cosine_scores
@@ -79,16 +79,15 @@ def common_recipes(cosine_scores_all):
 
     # Accumulate ranks of each recipe
     for cosine_scores in cosine_scores_all:
-        for (recipe_id, score) in cosine_scores:
+        for recipe_id, score in cosine_scores:
             if recipe_id in accumulated_ranks:
                 accumulated_ranks[recipe_id] += score
             else:
                 accumulated_ranks[recipe_id] = score
     # Sort the accumulated ranks in increasing order
-    top_10_recipes = sorted(accumulated_ranks.items(),
-                            key=lambda x: x[1], reverse=True)[:10]
+    top_recipes = sorted(accumulated_ranks.items(), key=lambda x: x[1], reverse=True)
 
-    return top_10_recipes
+    return top_recipes
 
 
 def get_sim_scores(top_recipes, cosine_scores_all, num_queries):
@@ -99,7 +98,7 @@ def get_sim_scores(top_recipes, cosine_scores_all, num_queries):
     # Get recipe IDs from top recipes
     top_ids = {recipe_id for recipe_id, _ in top_recipes}
     # Initialize dictionary to store scores with a list containing zeros initially for each query
-    scores = {recipe_id: [0]*num_queries for recipe_id in top_ids}
+    scores = {recipe_id: [0] * num_queries for recipe_id in top_ids}
 
     for query_index, s in enumerate(cosine_scores_all):
         for recipe_id, score in s:
@@ -110,7 +109,9 @@ def get_sim_scores(top_recipes, cosine_scores_all, num_queries):
     return scores
 
 
-def algorithm(queries, inverted_index, idf, recipe_norms):
+def algorithm(
+    queries, dietary_restrictions, inverted_index, idf, recipe_norms, id_to_recipe
+):
     """
     Runs cosine similarity for each query and then calculates the most common
     recipes from the results.
@@ -131,7 +132,35 @@ def algorithm(queries, inverted_index, idf, recipe_norms):
 
     top_recipes = common_recipes(cosine_scores)
 
+    # Filter out recipes based on dietary restrictions
+    top_recipes_filtered = []
+    for recipe_id, _ in top_recipes:
+        recipe = id_to_recipe[str(recipe_id)]
+        if (
+            dietary_restrictions["vegetarian"]
+            and not recipe["dietary_restrictions"]["vegetarian"]
+        ):
+            continue
+        if (
+            dietary_restrictions["vegan"]
+            and not recipe["dietary_restrictions"]["vegan"]
+        ):
+            continue
+        if (
+            dietary_restrictions["gluten-free"]
+            and not recipe["dietary_restrictions"]["gluten-free"]
+        ):
+            continue
+        if (
+            dietary_restrictions["dairy-free"]
+            and not recipe["dietary_restrictions"]["dairy-free"]
+        ):
+            continue
+        top_recipes_filtered.append((recipe_id, 0))
+
     num_queries = len(queries)
 
     # Get the top 10 most common recipes from the cosine similarity scores
-    return top_recipes, get_sim_scores(top_recipes, cosine_scores, num_queries)
+    return top_recipes_filtered[:10], get_sim_scores(
+        top_recipes, cosine_scores, num_queries
+    )

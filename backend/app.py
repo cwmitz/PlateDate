@@ -1,13 +1,10 @@
 import json
 import os
+
 import algorithm
-
 import pandas as pd
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
-from helpers.MySQLDatabaseHandler import MySQLDatabaseHandler
-from pathlib import Path
-
 
 # ROOT_PATH for linking with all your files.
 # Feel free to use a config.py or settings.py with a global export variable
@@ -30,41 +27,47 @@ app = Flask(__name__)
 CORS(app)
 
 
-idf_path = os.path.join(current_directory, 'data/idf.json')
-inv_idx_path = os.path.join(current_directory, 'data/inv_idx.json')
-recipe_norms_path = os.path.join(
-    current_directory, 'data/recipe_norms.json')
-id_to_recipe_path = os.path.join(
-    current_directory, 'data/id_to_recipe.json')
+idf_path = os.path.join(current_directory, "data/idf.json")
+inv_idx_path = os.path.join(current_directory, "data/inv_idx.json")
+recipe_norms_path = os.path.join(current_directory, "data/recipe_norms.json")
+id_to_recipe_path = os.path.join(current_directory, "data/id_to_recipe.json")
 
-with open(idf_path, 'r') as f:
+with open(idf_path, "r") as f:
     idf = json.load(f)
 
-with open(inv_idx_path, 'r') as f:
+with open(inv_idx_path, "r") as f:
     inverted_index = json.load(f)
 
-with open(recipe_norms_path, 'r') as f:
+with open(recipe_norms_path, "r") as f:
     recipe_norms = {int(k): v for k, v in json.load(f).items()}
 
-with open(id_to_recipe_path, 'r') as f:
+with open(id_to_recipe_path, "r") as f:
     id_to_recipe = json.load(f)
 
 
-def cosine_search(queries):
+def cosine_search(queries, dietary_restrictions):
     top_10_recipes, sim_scores = algorithm.algorithm(
-        queries, inverted_index, idf, recipe_norms)
+        queries,
+        dietary_restrictions,
+        inverted_index,
+        idf,
+        recipe_norms,
+        id_to_recipe,
+    )
 
     top_10_ids = [recipe_id for recipe_id, _ in top_10_recipes]
 
     details = [
-        {"name": id_to_recipe[str(recipe_id)]["name"],
-         "instructions": id_to_recipe[str(recipe_id)]["instructions"],
-         "aggregated_rating": id_to_recipe[str(recipe_id)]["aggregated_rating"],
-         "image": id_to_recipe[str(recipe_id)]["image"],
-         "Url": id_to_recipe[str(recipe_id)]["Url"],
-         "similarity_scores": sim_scores[recipe_id]
-         }
-        for recipe_id in top_10_ids if str(recipe_id) in id_to_recipe
+        {
+            "name": id_to_recipe[str(recipe_id)]["name"],
+            "instructions": id_to_recipe[str(recipe_id)]["instructions"],
+            "aggregated_rating": id_to_recipe[str(recipe_id)]["aggregated_rating"],
+            "image": id_to_recipe[str(recipe_id)]["image"],
+            "Url": id_to_recipe[str(recipe_id)]["Url"],
+            "similarity_scores": sim_scores[recipe_id],
+        }
+        for recipe_id in top_10_ids
+        if str(recipe_id) in id_to_recipe
     ]
 
     return details
@@ -77,8 +80,18 @@ def home():
 
 @app.route("/recipes")
 def recipes_search():
-    texts = request.args.getlist("title")
-    search_results = cosine_search(texts)
+    texts = [
+        request.args.get(f"title{i}")
+        for i in range(len(request.args))
+        if f"title{i}" in request.args
+    ]
+    dietary_restrictions = {
+        "vegetarian": request.args.get("vegetarian") == "true",
+        "vegan": request.args.get("vegan") == "true",
+        "gluten-free": request.args.get("gluten-free") == "true",
+        "dairy-free": request.args.get("dairy-free") == "true",
+    }
+    search_results = cosine_search(texts, dietary_restrictions)
     return jsonify(search_results)
 
 

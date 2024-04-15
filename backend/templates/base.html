@@ -1,182 +1,252 @@
-<!doctype html>
+<!DOCTYPE html>
 <title>{% block title %}{% endblock %} - Flaskr</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
-    rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
+  rel="stylesheet"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+/>
 
-<body style="background-color: #E6BAA3;">
-    <div class="full-body-container">
-        <div class="title-font">
-            <h1 id="title">PlateDate</h1>
-            <i class="fa fa-cutlery" style="font-size:60px;color:white"></i>
-        </div>
-        <div class="specifications">
-            <p>How much time do you have to cook?</p>
-        </div>
-        <div class="specifications">
-            <div class="sliding-time">
-                <input type="range" min="0" max="240" value="60" class="slider" id="time-slider">
-                <p id="time-output">60 minutes</p>
-            </div>
-        </div>
-        <div class="specifications">
-            <label>Indicate any dietary restrictions: </label>
-            <div class="checkbox-container">
-                <input type="checkbox" id="vegetarian" name="vegetarian">
-                <label for="vegetarian">Vegetarian</label>
-                <input type="checkbox" id="vegan" name="vegan">
-                <label for="vegan">Vegan</label>
-                <input type="checkbox" id="gluten-free" name="gluten-free">
-                <label for="gluten-free">Gluten-Free</label>
-                <input type="checkbox" id="dairy-free" name="dairy-free">
-                <label for="dairy-free">Dairy-Free</label>
-            </div>
-        </div>
-        <div class="dropdown-and-search-container">
-            <label for="number-select" style="margin-bottom: 10px;">How many people are you cooking with?</label>
-            <div id="dropdown-menu" style="display: flex; justify-content: center; align-items: center;">
-                <select id="number-select">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                </select>
-                <button onclick="generateSearchBars()">Enter</button>
-            </div>
-        </div>
-        <div id="search-bars-container"></div>
-        <div id="answer-box"></div>
+<body style="background-color: #e6baa3">
+  <div class="full-body-container">
+    <div class="title-font">
+      <h1 id="title">PlateDate</h1>
+      <i class="fa fa-cutlery" style="font-size: 60px; color: white"></i>
     </div>
+    <!-- <div class="specifications">
+      <p>How much time do you have to cook?</p>
+    </div>
+    <div class="specifications">
+      <div class="sliding-time">
+        <input
+          type="range"
+          min="0"
+          max="240"
+          value="60"
+          class="slider"
+          id="time-slider"
+        />
+        <p id="time-output">60 minutes</p>
+      </div>
+    </div> -->
+    <div class="specifications">
+      <label>Indicate any dietary restrictions: </label>
+      <div class="checkbox-container">
+        <input type="checkbox" id="vegetarian" name="vegetarian" />
+        <label for="vegetarian">Vegetarian</label>
+        <input type="checkbox" id="vegan" name="vegan" />
+        <label for="vegan">Vegan</label>
+        <input type="checkbox" id="gluten-free" name="gluten-free" />
+        <label for="gluten-free">Gluten-Free</label>
+        <input type="checkbox" id="dairy-free" name="dairy-free" />
+        <label for="dairy-free">Dairy-Free</label>
+      </div>
+    </div>
+    <div class="dropdown-and-search-container">
+      <label for="number-select" style="margin-bottom: 10px"
+        >How many people are you cooking with?</label
+      >
+      <div
+        id="dropdown-menu"
+        style="display: flex; justify-content: center; align-items: center"
+      >
+        <select id="number-select">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+        <button onclick="generateSearchBars()">Enter</button>
+      </div>
+    </div>
+    <div id="search-bars-container"></div>
+    <div id="answer-box"></div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const timeSlider = document.getElementById("time-slider");
-        const timeOutput = document.getElementById("time-output");
-        timeOutput.innerHTML = timeSlider.value + " minutes";
-        timeSlider.oninput = function () {
-            timeOutput.innerHTML = this.value + " minutes";
-        }
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // const timeSlider = document.getElementById("time-slider")
+    // const timeOutput = document.getElementById("time-output")
+    // timeOutput.innerHTML = timeSlider.value + " minutes"
+    // timeSlider.oninput = function () {
+    //   timeOutput.innerHTML = this.value + " minutes"
+    // }
 
-        function generateSearchBars() {
-            const numberOfSearchBars = document.getElementById('number-select').value;
-            const container = document.getElementById('search-bars-container');
-            container.innerHTML = '';
+    function generateSearchBars() {
+      const numberOfSearchBars = document.getElementById("number-select").value
+      const container = document.getElementById("search-bars-container")
+      container.innerHTML = ""
 
-            for (let i = 0; i < numberOfSearchBars; i++) {
-                const searchBoxDiv = document.createElement('div');
-                searchBoxDiv.classList.add('input-box');
+      for (let i = 0; i < numberOfSearchBars; i++) {
+        const searchBoxDiv = document.createElement("div")
+        searchBoxDiv.classList.add("input-box")
 
-                const searchInput = document.createElement('input');
-                searchInput.placeholder = "What do you want to eat?";
-                searchInput.setAttribute("onkeyup", "filterText()");
+        const searchInput = document.createElement("input")
+        searchInput.placeholder = "What do you want to eat?"
+        searchInput.setAttribute("onkeyup", "filterText()")
 
-                const searchIcon = document.createElement('img');
-                searchIcon.src = "{{ url_for('static', filename='images/mag.png') }}";
+        const searchIcon = document.createElement("img")
+        searchIcon.src = "{{ url_for('static', filename='images/mag.png') }}"
 
-                searchBoxDiv.appendChild(searchIcon);
-                searchBoxDiv.appendChild(searchInput);
-                container.appendChild(searchBoxDiv);
-            }
-        }
+        searchBoxDiv.appendChild(searchIcon)
+        searchBoxDiv.appendChild(searchInput)
+        container.appendChild(searchBoxDiv)
+      }
+    }
 
-        var titles = []; // Global variable to hold titles
+    /**
+     * Getting dietary restrictions
+     */
+    function getDietaryRestrictions() {
+      const dietaryRestrictions = {
+        vegetarian: false,
+        vegan: false,
+        glutenFree: false,
+        dairyFree: false,
+      }
+      const vegetarian = document.getElementById("vegetarian").checked
+      const vegan = document.getElementById("vegan").checked
+      const glutenFree = document.getElementById("gluten-free").checked
+      const dairyFree = document.getElementById("dairy-free").checked
 
-        function filterText() {
-            const searchInputs = document.querySelectorAll('#search-bars-container input');
-            titles = Array.from(searchInputs).map(input => input.value).filter(value => value.trim() !== "");
-            const queryString = titles.map(title => `title=${encodeURIComponent(title)}`).join('&');
+      if (vegetarian) {
+        dietaryRestrictions["vegetarian"] = true
+      }
+      if (vegan) {
+        dietaryRestrictions["vegan"] = true
+      }
+      if (glutenFree) {
+        dietaryRestrictions["glutenFree"] = true
+      }
+      if (dairyFree) {
+        dietaryRestrictions["dairyFree"] = true
+      }
 
-            document.getElementById("answer-box").innerHTML = "";
-            if (titles.length > 0) {
-                fetch(`/recipes?${queryString}`)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        displayRecipes(data);
-                        titles = titles; // Make sure to update titles globally or pass to displayRecipes if needed
-                    });
-            }
-        }
+      return dietaryRestrictions
+    }
 
-        function displayRecipes(recipes) {
-            const answerBox = document.getElementById('answer-box');
-            recipes.forEach((recipe, index) => {
-                let tempDiv = document.createElement("div");
-                tempDiv.innerHTML = `
-        <img src="${recipe.image}" alt="${recipe.name}" style="width: 100px; height: 100px; margin-right: 10px;">
+    var titles = [] // Global variable to hold titles
+
+    function filterText() {
+      const searchInputs = document.querySelectorAll(
+        "#search-bars-container input"
+      )
+      titles = Array.from(searchInputs)
+        .map((input) => input.value)
+        .filter((value) => value.trim() !== "")
+
+      const dietaryRestrictions = getDietaryRestrictions()
+      const numberPeople = document.getElementById("number-select").value
+
+      const queryParams = new URLSearchParams({
+        ...dietaryRestrictions,
+        numberPeople: numberPeople,
+      })
+
+      titles.forEach((title, index) =>
+        queryParams.append(`title${index}`, title)
+      )
+
+      document.getElementById("answer-box").innerHTML = ""
+      if (titles.length > 0) {
+        fetch(`/recipes?${queryParams.toString()}`)
+          .then((response) => response.json())
+          .then((data) => {
+            displayRecipes(data)
+            titles = [] // Clear titles after displaying recipes
+          })
+      }
+    }
+
+    function displayRecipes(recipes) {
+      const answerBox = document.getElementById("answer-box")
+      recipes.forEach((recipe, index) => {
+        let tempDiv = document.createElement("div")
+        tempDiv.innerHTML = `
+        <img src="${recipe.image}" alt="${
+          recipe.name
+        }" style="width: 100px; height: 100px; margin-right: 10px;">
         <h3><a href="${recipe.url}" target="_blank">${recipe.name}</a></h3>
         <p>${recipe.instructions}</p>
         <h4>Query Relevance</h4>
         <canvas id="pieChart-${index}" width="100" height="100"></canvas>
         <p>Rating: ${generateStars(recipe.aggregated_rating)}</p>
-    `;
-                answerBox.appendChild(tempDiv);
-                createPieChart(recipe.similarity_scores, titles, index); // Now passing titles as well
-            });
-        }
+    `
+        answerBox.appendChild(tempDiv)
+        createPieChart(recipe.similarity_scores, titles, index) // Now passing titles as well
+      })
+    }
 
-        function createPieChart(similarityScores, titles, chartIndex) {
-            const ctx = document.getElementById(`pieChart-${chartIndex}`).getContext('2d');
-            const data = {
-                labels: similarityScores.map((_, i) => `Query #${i + 1}`),
-                datasets: [{
-                    label: 'Similarity Score',
-                    data: similarityScores,
-                    backgroundColor: [
-                        'rgba(150, 111, 51, 1)',
-                        'rgba(205, 133, 63, 1)',
-                        'rgba(139, 69, 19, 1)',
-                        'rgba(222, 184, 135, 1)',
-                        'rgba(160, 82, 45, 1)',
-                        'rgba(210, 180, 140, 1)'
-                    ],
-                    borderColor: [
-                        'rgba(150, 111, 51, 1)',
-                        'rgba(205, 133, 63, 1)',
-                        'rgba(139, 69, 19, 1)',
-                        'rgba(222, 184, 135, 1)',
-                        'rgba(160, 82, 45, 1)',
-                        'rgba(210, 180, 140, 1)'
-                    ]
-                    ,
-                    borderWidth: 1
-                }]
-            };
+    function createPieChart(similarityScores, titles, chartIndex) {
+      const ctx = document
+        .getElementById(`pieChart-${chartIndex}`)
+        .getContext("2d")
+      const data = {
+        labels: similarityScores.map((_, i) => `Query #${i + 1}`),
+        datasets: [
+          {
+            label: "Similarity Score",
+            data: similarityScores,
+            backgroundColor: [
+              "rgba(150, 111, 51, 1)",
+              "rgba(205, 133, 63, 1)",
+              "rgba(139, 69, 19, 1)",
+              "rgba(222, 184, 135, 1)",
+              "rgba(160, 82, 45, 1)",
+              "rgba(210, 180, 140, 1)",
+            ],
+            borderColor: [
+              "rgba(150, 111, 51, 1)",
+              "rgba(205, 133, 63, 1)",
+              "rgba(139, 69, 19, 1)",
+              "rgba(222, 184, 135, 1)",
+              "rgba(160, 82, 45, 1)",
+              "rgba(210, 180, 140, 1)",
+            ],
+            borderWidth: 1,
+          },
+        ],
+      }
 
-            const config = {
-                type: 'pie',
-                data: data,
-                options: {
-                    responsive: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function (tooltipItem) {
-                                    const query = titles[tooltipItem.dataIndex];
-                                    const score = tooltipItem.raw.toFixed(2);
-                                    return [`${query ? `"${query}"` : "Unknown Query"}`, `${score}`];
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-            new Chart(ctx, config);
-        }
+      const config = {
+        type: "pie",
+        data: data,
+        options: {
+          responsive: false,
+          plugins: {
+            legend: {
+              display: false,
+            },
+            tooltip: {
+              callbacks: {
+                label: function (tooltipItem) {
+                  const query = titles[tooltipItem.dataIndex]
+                  const score = tooltipItem.raw.toFixed(2)
+                  return [
+                    `${query ? `"${query}"` : "Unknown Query"}`,
+                    `${score}`,
+                  ]
+                },
+              },
+            },
+          },
+        },
+      }
+      new Chart(ctx, config)
+    }
 
-
-        function generateStars(rating) {
-            let stars = '';
-            for (let i = 1; i <= 5; i++) {
-                stars += i <= Math.floor(rating) ? '★' : '☆';
-            }
-            return stars;
-        }
-    </script>
+    function generateStars(rating) {
+      let stars = ""
+      for (let i = 1; i <= 5; i++) {
+        stars += i <= Math.floor(rating) ? "★" : "☆"
+      }
+      return stars
+    }
+  </script>
 </body>
