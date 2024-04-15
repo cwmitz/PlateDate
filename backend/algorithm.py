@@ -72,7 +72,7 @@ def common_recipes(cosine_scores_all):
         cosine_scores_all (list): List of cosine similarity scores for each query.
 
     Returns:
-        top_10_recipes (list): The top 10 most common recipes from the cosine similarity scores.
+        top_10_recipes (list): A list of tuples of (recipe_id, score)
     """
     # Dictionary to store accumulated ranks of each recipe
     accumulated_ranks = {}
@@ -103,7 +103,7 @@ def get_sim_scores(top_recipes, cosine_scores_all, num_queries):
 
     for query_index, s in enumerate(cosine_scores_all):
         for recipe_id, score in s:
-            if recipe_id in scores:
+            if recipe_id in top_ids:
                 # Replace the zero at the query index with the actual score
                 scores[recipe_id][query_index] = score
 
