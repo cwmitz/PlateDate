@@ -1,18 +1,165 @@
 import re
 
 
+def tokenize(text):
+    """
+    Tokenizes the input string into a list of words and removes any punctuation.
+
+    Args:
+        text (str): The input string to tokenize.
+
+    Returns:
+        list: The list of words from the input string with any punctuation removed.
+    """
+    return re.findall(r"[a-z]+", text.lower())
+
+
 def dietary_restrictions_check(recipe):
     """
-    Takes in the recipe and returns a list of booleans correcponding to
-    [gluten free, dairy free, vegetarian, vegan, and nut free]
+    Returns a dictionary of dietary restrictions and a boolean value for each restriction.
+    We initially assume that the recipe is vegan, vegetarian, gluten free, dairy free, and nut free,
+    but if we find key words to the contrary, we will set the corresponding value to False.
+
+    Args:
+        recipe (dict): The recipe dictionary.
+
+    Returns:
+        dict: A dictionary of dietary restrictions and a boolean value for each restriction.
+            in the format of:
+            {
+            "vegan" : bool,
+            "vegetarian" : bool,
+            "gluten_free" : bool,
+            "dairy_free" : bool,
+            "nut_free" : bool,
+            }
     """
-    keywords = re.findall(r'"([^"]*)"', recipe["Keywords"].lower())
-    vegan = "vegan" in keywords
-    vegetarian = ("vegetarian" in keywords) or vegan
-    gluten_free = ("gluten free" in keywords) or ("gluten-free" in keywords)
-    dairy_free = ("dairy free" in keywords) or ("dairy-free" in keywords) or vegan
-    nut_free = ("nut free" in keywords) or ("nut-free" in keywords)
-    return [gluten_free, dairy_free, vegetarian, vegan, nut_free]
+    # Sets of terms that indicate the recipe is not vegan, vegetarian, gluten free,
+    # dairy free, or nut free
+    vegetarian_terms = {
+        "beef",
+        "pork",
+        "chicken",
+        "fish",
+        "seafood",
+        "meat",
+        "bacon",
+        "lamb",
+        "turkey",
+        "duck",
+        "goose",
+        "rabbit",
+        "venison",
+        "veal",
+        "ham",
+        "salmon",
+        "tuna",
+        "sardines",
+        "anchovies",
+        "trout",
+        "mackerel",
+        "herring",
+        "sausage",
+        "pepperoni",
+        "prosciutto",
+        "salami",
+        "bologna",
+        "pastrami",
+        "spam",
+    }
+    vegan_terms = {
+        "milk",
+        "cheese",
+        "butter",
+        "cream",
+        "yogurt",
+        "gelatin",
+        "honey",
+        "eggs",
+        "lard",
+        "casein",
+        "whey",
+    }
+    gluten_free_terms = {
+        "wheat",
+        "barley",
+        "rye",
+        "malt",
+        "yeast",
+        "triticale",
+        "bread",
+        "pasta",
+        "cereal",
+        "flour",
+        "breadcrumbs",
+        "croutons",
+        "couscous",
+        "farina",
+        "semolina",
+        "spelt",
+        "bulgur",
+        "durum",
+    }
+    dairy_free_terms = {
+        "milk",
+        "cheese",
+        "butter",
+        "cream",
+        "yogurt",
+        "lactose",
+        "whey",
+        "casein",
+    }
+    nut_free_terms = {
+        "almond",
+        "hazelnut",
+        "walnut",
+        "cashew",
+        "pecan",
+        "pistachio",
+        "macadamia",
+        "nut",
+        "nutty",
+    }
+
+    # Initialize all dietary restrictions to True
+    vegetarian = True
+    vegan = True
+    gluten_free = True
+    dairy_free = True
+    nut_free = True
+
+    # Tokenize the relevant fields of the recipe
+    tokens = set(
+        tokenize(recipe["Name"])
+        + tokenize(recipe["RecipeIngredientParts"][1:])
+        + tokenize(recipe["Keywords"][1:])
+        + tokenize(recipe["RecipeCategory"])
+    )
+
+    # Check if any of the dietary restriction terms are in the tokens
+    for term in tokens:
+        # If it's not vegetarian, it's not vegan
+        if term in vegetarian_terms:
+            vegetarian = False
+            vegan = False
+        if term in dairy_free_terms:
+            dairy_free = False
+            vegan = False
+        if term in vegan_terms:
+            vegan = False
+        if term in gluten_free_terms:
+            gluten_free = False
+        if term in nut_free_terms:
+            nut_free = False
+
+    return {
+        "vegan": vegan,
+        "vegetarian": vegetarian,
+        "gluten_free": gluten_free,
+        "dairy_free": dairy_free,
+        "nut_free": nut_free,
+    }
 
 
 def parse_ingredients(recipe):
