@@ -1,99 +1,101 @@
-.full-body-container{
-    position: absolute;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    width:100%;
-    height:100%;
-    display: flex;
-    justify-content: start;
-    align-items: center;
-    flex-direction: column;
+.full-body-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  flex-direction: column;
 }
 
-#title{
-    color:	#6D2932;
+#title {
+  color: #6d2932;
 }
 
-#background{
-    color:	#E6BAA3;
+#background {
+  color: #e6baa3;
 }
 
-.title-font{
-    display: flex;
-    align-items: center;
-    font-size: 48px;
-    font-family: 'Montserrat', sans-serif;
+.title-font {
+  display: flex;
+  align-items: center;
+  font-size: 48px;
+  font-family: "Montserrat", sans-serif;
 }
 
-.title-font h1{
-    margin-bottom: 0;
-    margin-right: 3px;
+.title-font h1 {
+  margin-bottom: 0;
+  margin-right: 3px;
 }
 
-.input-box{
-    border-radius: 50px;
-    border:1px solid black;
-    background-color: white;
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
-    padding:12px;
-    width: 600px;
+.input-box {
+  border-radius: 50px;
+  border: 1px solid black;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  padding: 12px;
+  width: 600px;
 }
 
-.input-box img{
-    height: 20px;
-    width:20px;
+.input-box img {
+  height: 20px;
+  width: 20px;
 }
 
-.top-text{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.top-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.input-box input{
-    width: 100%;
-    margin-left: 10px;
-    font-size: 16px;
-    border: none;
-    outline: 0;
+.input-box input {
+  width: 100%;
+  margin-left: 10px;
+  font-size: 16px;
+  border: none;
+  outline: 0;
 }
 
-#answer-box{
-    width: 700px;
-    margin-top:50px; 
+#answer-box {
+  width: 700px;
+  margin-top: 50px;
 }
-
 
 .full-body-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: start;
-    align-items: center;
-    flex-direction: column; 
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  flex-direction: column;
 }
 
 .specifications {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: 'Montserrat', sans-serif;
-    margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Montserrat", sans-serif;
+  margin-bottom: 10px;
 }
 
 .dropdown-and-search-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    font-family: 'Montserrat', sans-serif;
+  display: flex;
+  justify-content: center;
+  font-family: "Montserrat", sans-serif;
+}
+
+input[type="checkbox"] {
+  cursor: pointer;
+  transform: scale(1.2);
 }

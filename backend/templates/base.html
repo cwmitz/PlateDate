@@ -18,24 +18,7 @@
       <h1 id="title">PlateDate</h1>
       <i class="fa fa-cutlery" style="font-size: 60px; color: white"></i>
     </div>
-    <!-- <div class="specifications">
-      <p>How much time do you have to cook?</p>
-    </div>
     <div class="specifications">
-      <div class="sliding-time">
-        <input
-          type="range"
-          min="0"
-          max="240"
-          value="60"
-          class="slider"
-          id="time-slider"
-        />
-        <p id="time-output">60 minutes</p>
-      </div>
-    </div> -->
-    <div class="specifications">
-      <label>Indicate any dietary restrictions: </label>
       <div class="checkbox-container">
         <input type="checkbox" id="vegetarian" name="vegetarian" />
         <label for="vegetarian">Vegetarian</label>
@@ -47,36 +30,37 @@
         <label for="dairy-free">Dairy-Free</label>
       </div>
     </div>
-    <div class="dropdown-and-search-container">
-      <label for="number-select" style="margin-bottom: 10px"
-        >How many people are you cooking with?</label
+    <div
+      class="dropdown-and-search-container"
+      style="display: flex; align-items: center"
+    >
+      <label for="number-select" style="margin-right: 10px"
+        >How many people?</label
       >
-      <div
-        id="dropdown-menu"
-        style="display: flex; justify-content: center; align-items: center"
-      >
-        <select id="number-select">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-        </select>
-        <button onclick="generateSearchBars()">Enter</button>
-      </div>
+      <select id="number-select">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
     </div>
+
     <div id="search-bars-container"></div>
     <div id="answer-box"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // const timeSlider = document.getElementById("time-slider")
-    // const timeOutput = document.getElementById("time-output")
-    // timeOutput.innerHTML = timeSlider.value + " minutes"
-    // timeSlider.oninput = function () {
-    //   timeOutput.innerHTML = this.value + " minutes"
-    // }
+    // Calls the function to generate search bars when the page loads
+    document.addEventListener("DOMContentLoaded", () => {
+      generateSearchBars()
+    })
+
+    // Calls the function to generate search bars when the number of people changes
+    document.getElementById("number-select").addEventListener("change", () => {
+      generateSearchBars()
+    })
 
     function generateSearchBars() {
       const numberOfSearchBars = document.getElementById("number-select").value
