@@ -45,7 +45,7 @@ with open(id_to_recipe_path, "r") as f:
     id_to_recipe = json.load(f)
 
 
-def cosine_search(queries, dietary_restrictions):
+def cosine_search(queries, dietary_restrictions, time_limit):
     top_10_recipes, sim_scores = algorithm.algorithm(
         queries,
         dietary_restrictions,
@@ -53,6 +53,7 @@ def cosine_search(queries, dietary_restrictions):
         idf,
         recipe_norms,
         id_to_recipe,
+        time_limit
     )
 
     top_10_ids = [recipe_id for recipe_id, _ in top_10_recipes]
@@ -91,7 +92,8 @@ def recipes_search():
         "gluten-free": request.args.get("gluten-free") == "true",
         "dairy-free": request.args.get("dairy-free") == "true",
     }
-    search_results = cosine_search(texts, dietary_restrictions)
+    time_limit = request.args.get("timeLimit")  
+    search_results = cosine_search(texts, dietary_restrictions, time_limit)
     return jsonify(search_results)
 
 

@@ -19,6 +19,15 @@
       <i class="fa fa-cutlery" style="font-size: 60px; color: white"></i>
     </div>
     <div class="specifications">
+      <p>How much time do you have?</p>
+    </div>
+    <div class="specifications">
+        <div class="sliding-time">
+            <input type="range" min="0" max="240" value="60" class="slider" id="time-limit">
+            <p id="time-output">60 minutes</p>
+        </div>
+    </div>
+    <div class="specifications">
       <div class="checkbox-container">
         <input type="checkbox" id="vegetarian" name="vegetarian" />
         <label for="vegetarian">Vegetarian</label>
@@ -52,6 +61,19 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    const timeSlider = document.getElementById("time-limit");
+    const timeOutput = document.getElementById("time-output");
+    timeSlider.oninput = function() {
+      timeSlider.value / 60 >= 1
+        ? (timeOutput.innerHTML =
+            Math.floor(timeSlider.value / 60) +
+            " hours " +
+            (timeSlider.value % 60) +
+            " minutes")
+        : (timeOutput.innerHTML = timeSlider.value + " minutes");
+    }
+
+
     // Calls the function to generate search bars when the page loads
     document.addEventListener("DOMContentLoaded", () => {
       generateSearchBars()
@@ -82,6 +104,11 @@
         searchBoxDiv.appendChild(searchInput)
         container.appendChild(searchBoxDiv)
       }
+    }
+
+    function getTimeLimit(){
+      const timeLimit = document.getElementById("time-limit").value
+      return timeLimit
     }
 
     /**
@@ -126,6 +153,7 @@
         .filter((value) => value.trim() !== "")
 
       const dietaryRestrictions = getDietaryRestrictions()
+      const timeLimit = getTimeLimit()
       const numberPeople = document.getElementById("number-select").value
 
       const queryParams = new URLSearchParams({

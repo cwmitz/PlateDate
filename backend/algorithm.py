@@ -108,9 +108,31 @@ def get_sim_scores(top_recipes, cosine_scores_all, num_queries):
 
     return scores
 
+def iso_to_min(iso_time):
+    """
+    Converts ISO 8601 formatted time to minutes.
+
+    Args:
+        iso_time (str): The time in ISO 8601 format.
+
+    Returns:
+        int: The time in minutes.
+    """
+    if iso_to_min == "PT0S":
+        return 0
+    total_minutes = 0
+    iso_time = iso_time[2:]
+    if "H" in iso_time:
+        total_minutes += int(iso_time.split("H")[0]) * 60
+        h_idx = iso_time.index('H')
+        iso_time = iso_time[h_idx+1:]
+    if "M" in iso_time:
+        total_minutes += int(iso_time.split("M")[0])    
+    return total_minutes
+
 
 def algorithm(
-    queries, dietary_restrictions, inverted_index, idf, recipe_norms, id_to_recipe
+    queries, dietary_restrictions, inverted_index, idf, recipe_norms, id_to_recipe, time_limit
 ):
     """
     Runs cosine similarity for each query and then calculates the most common
@@ -131,11 +153,13 @@ def algorithm(
     ]
 
     top_recipes = common_recipes(cosine_scores)
-
     # Filter out recipes based on dietary restrictions
     top_recipes_filtered = []
     for recipe_id, _ in top_recipes:
         recipe = id_to_recipe[str(recipe_id)]
+        # These two lines break the code
+        # if iso_to_min(recipe["total_time"]) > time_limit:
+        #     continue
         if (
             dietary_restrictions["vegetarian"]
             and not recipe["dietary_restrictions"]["vegetarian"]
