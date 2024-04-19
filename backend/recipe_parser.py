@@ -66,6 +66,7 @@ def dietary_restrictions_check(recipe):
         "bologna",
         "pastrami",
         "spam",
+        "steak",
     }
     vegan_terms = {
         "milk",
