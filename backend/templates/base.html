@@ -228,10 +228,12 @@
                             callbacks: {
                                 label: function (tooltipItem) {
                                     const query = titles[tooltipItem.dataIndex]
-                                    const score = tooltipItem.raw.toFixed(2)
+                                    const score = tooltipItem.raw
+                                    const totalScore = similarityScores.reduce((a, b) => a + b, 0);
+                                    const percentage = ((score / totalScore) * 100).toFixed(2);
                                     return [
                                         `${query ? `"${query}"` : "Unknown Query"}`,
-                                        `${score}`,
+                                        `${percentage}%`,
                                     ]
                                 },
                             },
