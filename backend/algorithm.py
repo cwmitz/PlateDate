@@ -1,5 +1,7 @@
 import data_processing
 import numpy as np
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
 
 
 def accumulate_dot_scores(query_set, inverted_index, idf):
@@ -41,7 +43,7 @@ def cosine_similarity(query, inverted_index, idf, recipe_norms):
         cosine_scores (list): List of (recipe ID, cosine similarity score) pairs.
     """
     # Tokenize the input query
-    query_set = data_processing.tokenize(query)
+    query_set = data_processing.tokenize(query, inverted_index)
 
     # Compute query norm
     query_norm = 0
@@ -57,7 +59,8 @@ def cosine_similarity(query, inverted_index, idf, recipe_norms):
     cosine_scores = []
     for recipe_id, dot_score in dot_scores.items():
         cosine_scores.append(
-            (int(recipe_id), dot_score / (query_norm * recipe_norms[int(recipe_id)]))
+            (int(recipe_id), dot_score /
+             (query_norm * recipe_norms[int(recipe_id)]))
         )
 
     return cosine_scores
@@ -85,7 +88,8 @@ def common_recipes(cosine_scores_all):
             else:
                 accumulated_ranks[recipe_id] = score
     # Sort the accumulated ranks in increasing order
-    top_recipes = sorted(accumulated_ranks.items(), key=lambda x: x[1], reverse=True)
+    top_recipes = sorted(accumulated_ranks.items(),
+                         key=lambda x: x[1], reverse=True)
 
     return top_recipes
 
@@ -108,6 +112,7 @@ def get_sim_scores(top_recipes, cosine_scores_all, num_queries):
 
     return scores
 
+
 def iso_to_min(iso_time):
     """
     Converts ISO 8601 formatted time to minutes.
@@ -127,7 +132,7 @@ def iso_to_min(iso_time):
         h_idx = iso_time.index('H')
         iso_time = iso_time[h_idx+1:]
     if "M" in iso_time:
-        total_minutes += int(iso_time.split("M")[0])    
+        total_minutes += int(iso_time.split("M")[0])
     return total_minutes
 
 

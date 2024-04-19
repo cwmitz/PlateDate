@@ -92,7 +92,7 @@ def recipes_search():
         "gluten-free": request.args.get("gluten-free") == "true",
         "dairy-free": request.args.get("dairy-free") == "true",
     }
-    time_limit = request.args.get("timeLimit")  
+    time_limit = request.args.get("timeLimit")
     search_results = cosine_search(texts, dietary_restrictions, time_limit)
     return jsonify(search_results)
 

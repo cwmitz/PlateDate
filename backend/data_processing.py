@@ -2,9 +2,10 @@ import re
 
 import numpy as np
 import recipe_parser
+from fuzzywuzzy import process, fuzz
 
 
-def tokenize(text):
+def tokenize(text, inverted_index):
     """
     Tokenizes the input string into a list of words and removes any punctuation.
 
@@ -14,7 +15,17 @@ def tokenize(text):
     Returns:
         list: The list of words from the input string with any punctuation removed.
     """
-    return re.findall(r"[a-z]+", text.lower())
+    tokens = re.findall(r"[a-z]+", text.lower())
+    corrected_tokens = []
+    for token in tokens:
+        if token not in inverted_index:
+            corrected_token = process.extractOne(
+                token, inverted_index.keys(), scorer=fuzz.ratio)
+            if corrected_token and corrected_token[1] >= 80:
+                corrected_tokens.append(corrected_token[0])
+        else:
+            corrected_tokens.append(token)
+    return corrected_tokens
 
 
 def build_inverted_index(recipes):
@@ -70,7 +81,8 @@ def build_id_to_recipe(recipes):
             "prep_time": recipe["PrepTime"],  # PT format
             "total_time": recipe["TotalTime"],  # PT format
             "review_count": (
-                int(recipe["ReviewCount"]) if recipe["ReviewCount"] != "NA" else 0
+                int(recipe["ReviewCount"]
+                    ) if recipe["ReviewCount"] != "NA" else 0
             ),
             "aggregated_rating": (
                 float(recipe["AggregatedRating"])
