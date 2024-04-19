@@ -77,6 +77,7 @@ def dietary_restrictions_check(recipe):
         "gelatin",
         "honey",
         "eggs",
+        "egg",
         "lard",
         "casein",
         "whey",
