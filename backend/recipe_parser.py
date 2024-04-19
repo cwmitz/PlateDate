@@ -99,6 +99,9 @@ def dietary_restrictions_check(recipe):
         "spelt",
         "bulgur",
         "durum",
+        "noodle",
+        "noodles",
+        "spaghetti"
     }
     dairy_free_terms = {
         "milk",
