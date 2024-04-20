@@ -89,8 +89,9 @@ def recipes_search():
     dietary_restrictions = {
         "vegetarian": request.args.get("vegetarian") == "true",
         "vegan": request.args.get("vegan") == "true",
-        "gluten-free": request.args.get("gluten-free") == "true",
-        "dairy-free": request.args.get("dairy-free") == "true",
+        "gluten_free": request.args.get("gluten_free") == "true",
+        "dairy_free": request.args.get("dairy_free") == "true",
+        "nut_free": request.args.get("nut_free") == "true"
     }
     time_limit = request.args.get("timeLimit")
     search_results = cosine_search(texts, dietary_restrictions, time_limit)

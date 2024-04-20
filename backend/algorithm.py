@@ -176,13 +176,18 @@ def algorithm(
         ):
             continue
         if (
-            dietary_restrictions["gluten-free"]
-            and not recipe["dietary_restrictions"]["gluten-free"]
+            dietary_restrictions["gluten_free"]
+            and not recipe["dietary_restrictions"]["gluten_free"]
         ):
             continue
         if (
-            dietary_restrictions["dairy-free"]
-            and not recipe["dietary_restrictions"]["dairy-free"]
+            dietary_restrictions["dairy_free"]
+            and not recipe["dietary_restrictions"]["dairy_free"]
+        ):
+            continue
+        if (
+            dietary_restrictions["nut_free"]
+            and not recipe["dietary_restrictions"]["nut_free"]
         ):
             continue
         top_recipes_filtered.append((recipe_id, 0))

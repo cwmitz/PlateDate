@@ -32,6 +32,8 @@
                 <label for="gluten-free">Gluten-Free</label>
                 <input type="checkbox" id="dairy-free" name="dairy-free" />
                 <label for="dairy-free">Dairy-Free</label>
+                <input type="checkbox" id="nut-free" name="nut-free" />
+                <label for="nut-free">Nut-Free</label>
             </div>
         </div>
         <div class="dropdown-and-search-container" style="display: flex; align-items: center">
@@ -108,13 +110,15 @@
             const dietaryRestrictions = {
                 vegetarian: false,
                 vegan: false,
-                glutenFree: false,
-                dairyFree: false,
+                gluten_free: false,
+                dairy_free: false,
+                nut_free: false,
             }
             const vegetarian = document.getElementById("vegetarian").checked
             const vegan = document.getElementById("vegan").checked
-            const glutenFree = document.getElementById("gluten-free").checked
-            const dairyFree = document.getElementById("dairy-free").checked
+            const gluten_free = document.getElementById("gluten-free").checked
+            const dairy_free = document.getElementById("dairy-free").checked
+            const nut_free = document.getElementById("nut-free").checked
 
             if (vegetarian) {
                 dietaryRestrictions["vegetarian"] = true
@@ -122,11 +126,14 @@
             if (vegan) {
                 dietaryRestrictions["vegan"] = true
             }
-            if (glutenFree) {
-                dietaryRestrictions["glutenFree"] = true
+            if (gluten_free) {
+                dietaryRestrictions["gluten_free"] = true
             }
-            if (dairyFree) {
-                dietaryRestrictions["dairyFree"] = true
+            if (dairy_free) {
+                dietaryRestrictions["dairy_free"] = true
+            }
+            if (nut_free) {
+                dietaryRestrictions["nut_free"] = true
             }
 
             return dietaryRestrictions
