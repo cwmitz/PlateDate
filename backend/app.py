@@ -31,6 +31,7 @@ idf_path = os.path.join(current_directory, "data/idf.json")
 inv_idx_path = os.path.join(current_directory, "data/inv_idx.json")
 recipe_norms_path = os.path.join(current_directory, "data/recipe_norms.json")
 id_to_recipe_path = os.path.join(current_directory, "data/id_to_recipe.json")
+svd_path = os.path.join(current_directory, "data/svd.json")
 
 with open(idf_path, "r") as f:
     idf = json.load(f)
@@ -44,8 +45,11 @@ with open(recipe_norms_path, "r") as f:
 with open(id_to_recipe_path, "r") as f:
     id_to_recipe = json.load(f)
 
+with open(svd_path, "r") as f:
+    svd = json.load(f)
 
-def cosine_search(queries, dietary_restrictions, time_limit):
+
+def cosine_search(queries, dietary_restrictions):
     top_10_recipes, sim_scores = algorithm.algorithm(
         queries,
         dietary_restrictions,
@@ -53,7 +57,7 @@ def cosine_search(queries, dietary_restrictions, time_limit):
         idf,
         recipe_norms,
         id_to_recipe,
-        time_limit
+        svd,
     )
 
     top_10_ids = [recipe_id for recipe_id, _ in top_10_recipes]
@@ -93,10 +97,9 @@ def recipes_search():
         "vegan": request.args.get("vegan") == "true",
         "gluten_free": request.args.get("gluten_free") == "true",
         "dairy_free": request.args.get("dairy_free") == "true",
-        "nut_free": request.args.get("nut_free") == "true"
+        "nut_free": request.args.get("nut_free") == "true",
     }
-    time_limit = request.args.get("timeLimit")
-    search_results = cosine_search(texts, dietary_restrictions, time_limit)
+    search_results = cosine_search(texts, dietary_restrictions)
     return jsonify(search_results)
 
 
