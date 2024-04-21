@@ -14,13 +14,6 @@
             <i class="fa fa-cutlery" style="font-size: 60px; color: white"></i>
         </div>
         <div class="specifications">
-            <p>How much time do you have?</p>
-        </div>
-        <div class="specifications">
-            <div class="sliding-time">
-                <input type="range" min="0" max="240" value="60" class="slider" id="time-limit">
-                <p id="time-output">60 minutes</p>
-            </div>
         </div>
         <div class="specifications">
             <div class="checkbox-container">
@@ -54,26 +47,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const timeSlider = document.getElementById("time-limit");
-        const timeOutput = document.getElementById("time-output");
-        timeSlider.oninput = function () {
-            timeSlider.value / 60 >= 1
-                ? (timeOutput.innerHTML =
-                    Math.floor(timeSlider.value / 60) +
-                    " hours " +
-                    (timeSlider.value % 60) +
-                    " minutes")
-                : (timeOutput.innerHTML = timeSlider.value + " minutes");
-        }
 
-
-        // Calls the function to generate search bars when the page loads
         document.addEventListener("DOMContentLoaded", () => {
             generateSearchBars();
             createSearchButton();
         })
 
-        // Calls the function to generate search bars when the number of people changes
         document.getElementById("number-select").addEventListener("change", () => {
             generateSearchBars();
             createSearchButton();
@@ -134,11 +113,6 @@
             document.getElementById("sort-dropdown-container").appendChild(sortContainer);
         }
 
-        function getTimeLimit() {
-            const timeLimit = document.getElementById("time-limit").value
-            return timeLimit
-        }
-
         /**
          * Getting dietary restrictions
          */
@@ -186,7 +160,6 @@
                 .filter((value) => value.trim() !== "")
 
             const dietaryRestrictions = getDietaryRestrictions()
-            const timeLimit = getTimeLimit()
             const numberPeople = document.getElementById("number-select").value
 
             const queryParams = new URLSearchParams({
@@ -218,13 +191,20 @@
                 tempDiv.setAttribute("data-total-time", recipe.total_time);
                 tempDiv.setAttribute("data-aggregated-rating", recipe.aggregated_rating);
                 tempDiv.setAttribute("data-original-index", index);
+                tempDiv.style.border = "2px solid #B38770";
+                tempDiv.style.padding = "10px";
+                tempDiv.style.marginBottom = "20px";
                 tempDiv.innerHTML = `
-            <img src="${recipe.image}" alt="${recipe.name}" style="width: 100px; height: 100px; margin-right: 10px;">
             <h3><a href="${recipe.Url}" target="_blank">${recipe.name}</a></h3>
-            <h4>Query Relevance</h4>
-            <canvas id="pieChart-${index}" width="100" height="100"></canvas>
+            <div style="display: flex; align-items: center;">
+                <img src="${recipe.image}" alt="${recipe.name}" style="width: 100px; height: 100px; margin-right: 10px;">
+                <div>
+                    <h4>Query Relevance</h4>
+                    <canvas id="pieChart-${index}" width="100" height="100"></canvas>
+                </div>
+            </div>
             <p>Rating: ${generateStars(recipe.aggregated_rating)}</p>
-            <p>Time: ${iso_to_min(recipe.total_time)} minutes</p>
+            <p>Total Time: ${iso_to_min(recipe.total_time)} minutes</p>
         `;
                 answerBox.appendChild(tempDiv);
                 const chartCanvas = document.getElementById(`pieChart-${index}`);
