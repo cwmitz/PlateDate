@@ -48,6 +48,7 @@
         </div>
 
         <div id="search-bars-container"></div>
+        <div id="sort-dropdown-container"></div>
         <div id="answer-box"></div>
     </div>
 
@@ -68,34 +69,69 @@
 
         // Calls the function to generate search bars when the page loads
         document.addEventListener("DOMContentLoaded", () => {
-            generateSearchBars()
+            generateSearchBars();
+            createSearchButton();
         })
 
         // Calls the function to generate search bars when the number of people changes
         document.getElementById("number-select").addEventListener("change", () => {
-            generateSearchBars()
+            generateSearchBars();
+            createSearchButton();
         })
 
         function generateSearchBars() {
-            const numberOfSearchBars = document.getElementById("number-select").value
-            const container = document.getElementById("search-bars-container")
-            container.innerHTML = ""
+            const numberOfSearchBars = document.getElementById("number-select").value;
+            const container = document.getElementById("search-bars-container");
+            container.innerHTML = "";
 
             for (let i = 0; i < numberOfSearchBars; i++) {
-                const searchBoxDiv = document.createElement("div")
-                searchBoxDiv.classList.add("input-box")
+                const searchBoxDiv = document.createElement("div");
+                searchBoxDiv.classList.add("input-box");
 
-                const searchInput = document.createElement("input")
-                searchInput.placeholder = "What do you want to eat?"
-                searchInput.setAttribute("onkeyup", "filterText()")
+                const searchInput = document.createElement("input");
+                searchInput.placeholder = "What do you want to eat?";
 
-                const searchIcon = document.createElement("img")
-                searchIcon.src = "{{ url_for('static', filename='images/mag.png') }}"
+                const searchIcon = document.createElement("img");
+                searchIcon.src = "{{ url_for('static', filename='images/mag.png') }}";
 
-                searchBoxDiv.appendChild(searchIcon)
-                searchBoxDiv.appendChild(searchInput)
-                container.appendChild(searchBoxDiv)
+                searchBoxDiv.appendChild(searchIcon);
+                searchBoxDiv.appendChild(searchInput);
+                container.appendChild(searchBoxDiv);
             }
+        }
+
+        function createSearchButton() {
+            const searchButton = document.createElement("button");
+            searchButton.textContent = "Search";
+            searchButton.addEventListener("click", filterText);
+            searchButton.style.display = "block";
+            searchButton.style.margin = "10px auto";
+            document.getElementById("search-bars-container").appendChild(searchButton);
+        }
+
+        function createSortDropdown() {
+            const sortLabel = document.createElement("label");
+            sortLabel.textContent = "Sort by: ";
+            sortLabel.style.marginRight = "10px";
+
+            const sortDropdown = document.createElement("select");
+            sortDropdown.id = "sort-dropdown";
+            sortDropdown.addEventListener("change", sortResults);
+
+            const options = ["Default", "Rating", "Time (increasing)"];
+            options.forEach((option) => {
+                const optionElement = document.createElement("option");
+                optionElement.value = option;
+                optionElement.textContent = option;
+                sortDropdown.appendChild(optionElement);
+            });
+
+            const sortContainer = document.createElement("div");
+            sortContainer.style.marginBottom = "20px";
+            sortContainer.appendChild(sortLabel);
+            sortContainer.appendChild(sortDropdown);
+            document.getElementById("sort-dropdown-container").innerHTML = ""; // Clear previous sort dropdown
+            document.getElementById("sort-dropdown-container").appendChild(sortContainer);
         }
 
         function getTimeLimit() {
@@ -139,7 +175,7 @@
             return dietaryRestrictions
         }
 
-        var titles = [] // Global variable to hold titles
+        var titles = []
 
         function filterText() {
             const searchInputs = document.querySelectorAll(
@@ -167,26 +203,32 @@
                 fetch(`/recipes?${queryParams.toString()}`)
                     .then((response) => response.json())
                     .then((data) => {
+                        console.log(data);
                         displayRecipes(data)
-                        titles = [] // Clear titles after displaying recipes
+                        titles = []
                     })
             }
         }
 
         function displayRecipes(recipes) {
-            const answerBox = document.getElementById("answer-box")
+            const answerBox = document.getElementById("answer-box");
             answerBox.innerHTML = "";
+            createSortDropdown();
             recipes.forEach((recipe, index) => {
-                let tempDiv = document.createElement("div")
+                let tempDiv = document.createElement("div");
+                tempDiv.setAttribute("data-total-time", recipe.total_time);
+                tempDiv.setAttribute("data-aggregated-rating", recipe.aggregated_rating);
+                tempDiv.setAttribute("data-original-index", index);
                 tempDiv.innerHTML = `
-                    <img src="${recipe.image}" alt="${recipe.name}" style="width: 100px; height: 100px; margin-right: 10px;">
-                    <h3><a href="${recipe.Url}" target="_blank">${recipe.name}</a></h3>
-                    <p>${recipe.instructions}</p>
-                    <h4>Query Relevance</h4>
-                    <canvas id="pieChart-${index}" width="100" height="100"></canvas>
-                    <p>Rating: ${generateStars(recipe.aggregated_rating)}</p>
-    `
-                answerBox.appendChild(tempDiv)
+            <img src="${recipe.image}" alt="${recipe.name}" style="width: 100px; height: 100px; margin-right: 10px;">
+            <h3><a href="${recipe.Url}" target="_blank">${recipe.name}</a></h3>
+            <p>${recipe.instructions}</p>
+            <h4>Query Relevance</h4>
+            <canvas id="pieChart-${index}" width="100" height="100"></canvas>
+            <p>Rating: ${generateStars(recipe.aggregated_rating)}</p>
+            <p>Time: ${iso_to_min(recipe.total_time)} minutes</p>
+        `;
+                answerBox.appendChild(tempDiv);
                 const chartCanvas = document.getElementById(`pieChart-${index}`);
                 const existingChart = Chart.getChart(chartCanvas);
                 if (existingChart) {
@@ -194,7 +236,7 @@
                 }
 
                 createPieChart(recipe.similarity_scores, titles, index);
-            })
+            });
         }
 
         function createPieChart(similarityScores, titles, chartIndex) {
@@ -263,6 +305,52 @@
                 stars += i <= Math.floor(rating) ? "★" : "☆"
             }
             return stars
+        }
+
+        function iso_to_min(iso_time) {
+            if (!iso_time || typeof iso_time !== "string") {
+                return 0;
+            }
+            let total_minutes = 0;
+            iso_time = iso_time.slice(2);
+            if (iso_time.includes("H")) {
+                total_minutes += parseInt(iso_time.split("H")[0]) * 60;
+                const h_idx = iso_time.indexOf("H");
+                iso_time = iso_time.slice(h_idx + 1);
+            }
+            if (iso_time.includes("M")) {
+                total_minutes += parseInt(iso_time.split("M")[0]);
+            }
+            return total_minutes;
+        }
+
+        function sortResults() {
+            const sortOption = document.getElementById("sort-dropdown").value;
+            const recipeElements = Array.from(document.getElementById("answer-box").children);
+
+            if (sortOption === "Rating") {
+                recipeElements.sort((a, b) => {
+                    const ratingA = parseFloat(a.getAttribute("data-aggregated-rating"));
+                    const ratingB = parseFloat(b.getAttribute("data-aggregated-rating"));
+                    return ratingB - ratingA;
+                });
+            } else if (sortOption === "Time (increasing)") {
+                recipeElements.sort((a, b) => {
+                    //console.log(a.getAttribute("data-total-time"));
+                    const timeA = iso_to_min(a.getAttribute("data-total-time"));
+                    const timeB = iso_to_min(b.getAttribute("data-total-time"));
+                    //console.log(timeA);
+                    return timeA - timeB;
+                });
+            } else if (sortOption === "Default") {
+                recipeElements.sort((a, b) => {
+                    const indexA = parseInt(a.getAttribute("data-original-index"));
+                    const indexB = parseInt(b.getAttribute("data-original-index"));
+                    return indexA - indexB;
+                });
+            }
+
+            recipeElements.forEach((element) => document.getElementById("answer-box").appendChild(element));
         }
     </script>
 </body>

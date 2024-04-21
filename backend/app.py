@@ -65,6 +65,8 @@ def cosine_search(queries, dietary_restrictions, time_limit):
             "aggregated_rating": id_to_recipe[str(recipe_id)]["aggregated_rating"],
             "image": id_to_recipe[str(recipe_id)]["image"],
             "Url": id_to_recipe[str(recipe_id)]["Url"],
+            # Include total_time
+            "total_time": id_to_recipe[str(recipe_id)].get("total_time", "PT0M"),
             "similarity_scores": sim_scores[recipe_id],
         }
         for recipe_id in top_10_ids
