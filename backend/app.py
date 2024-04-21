@@ -2,6 +2,7 @@ import json
 import os
 
 import algorithm
+import numpy as np
 import pandas as pd
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS

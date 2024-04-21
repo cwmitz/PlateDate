@@ -1,5 +1,8 @@
 import data_processing
 import numpy as np
+from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 def accumulate_dot_scores(query_set, inverted_index, idf):
@@ -27,40 +30,28 @@ def accumulate_dot_scores(query_set, inverted_index, idf):
     return dot_scores
 
 
-def cosine_similarity(query, inverted_index, idf, recipe_norms):
+def cosine_similarity_svd(query, vectorizer, svd_model, svd, id_to_recipe):
     """
     Computes the cosine similarity between the input query and each recipe in the dataset.
 
     Args:
         query (str): The input query to search for.
-        inverted_index (dict): The inverted index of the dataset.
-        idf (dict): The IDF of the dataset.
-        recipe_norms (dict): The euclidean norm of each recipe in the dataset.
+        vectorizer (TfidfVectorizer): The TfidfVectorizer object used to transform the query.
+        svd_model (TruncatedSVD): The TruncatedSVD object used to transform the query.
+        svd (dict): The SVD transformation of the dataset.
 
     Returns:
         cosine_scores (list): List of (recipe ID, cosine similarity score) pairs.
     """
-    # Tokenize the input query
-    query_set = data_processing.tokenize(query, inverted_index)
+    query_vec = vectorizer.transform([query])
+    query_svd = svd_model.transform(query_vec)
 
-    # Compute query norm
-    query_norm = 0
-    for term in query_set:
-        if term in idf:
-            query_norm += idf[term] ** 2
-    query_norm = np.sqrt(query_norm)
+    sim_scores = cosine_similarity(query_svd, svd)
 
-    # Compute the numerator term of the cosine similarity formula for each recipe
-    dot_scores = accumulate_dot_scores(query_set, inverted_index, idf)
+    ids = list(id_to_recipe.keys())
 
-    # Compute the cosine similarity score for each recipe
-    cosine_scores = []
-    for recipe_id, dot_score in dot_scores.items():
-        cosine_scores.append(
-            (int(recipe_id), dot_score / (query_norm * recipe_norms[int(recipe_id)]))
-        )
-
-    return cosine_scores
+    results = [(ids[i], sim_scores[0][i]) for i in range(len(sim_scores[0]))]
+    return results
 
 
 def common_recipes(cosine_scores_all):
@@ -109,29 +100,6 @@ def get_sim_scores(top_recipes, cosine_scores_all, num_queries):
     return scores
 
 
-# def iso_to_min(iso_time):
-#     """
-#     Converts ISO 8601 formatted time to minutes.
-
-#     Args:
-#         iso_time (str): The time in ISO 8601 format.
-
-#     Returns:
-#         int: The time in minutes.
-#     """
-#     if iso_to_min == "PT0S":
-#         return 0
-#     total_minutes = 0
-#     iso_time = iso_time[2:]
-#     if "H" in iso_time:
-#         total_minutes += int(iso_time.split("H")[0]) * 60
-#         h_idx = iso_time.index("H")
-#         iso_time = iso_time[h_idx + 1 :]
-#     if "M" in iso_time:
-#         total_minutes += int(iso_time.split("M")[0])
-#     return total_minutes
-
-
 def algorithm(
     queries,
     dietary_restrictions,
@@ -154,10 +122,37 @@ def algorithm(
     Returns:
         list: The top 10 recipes in common for all queries.
     """
+    corpus = []
+    for id, recipe in id_to_recipe.items():
+        text = (
+            " ".join(recipe["ingredients"])
+            + " "
+            + recipe["description"]
+            + " "
+            + recipe["instructions"]
+        )
+        corpus.append(text)
+
+    vectorizer = TfidfVectorizer(stop_words="english")
+    tfidf_matrix = vectorizer.fit_transform(corpus)
+
+    n_components = 150
+    svd_model = TruncatedSVD(n_components=n_components)
+    svd = svd_model.fit_transform(tfidf_matrix)
+
+    def cos_sim(query):
+        query_vec = vectorizer.transform([query])
+        query_svd = svd_model.transform(query_vec)
+
+        sim_scores = cosine_similarity(query_svd, svd)
+
+        ids = list(id_to_recipe.keys())
+
+        results = [(ids[i], sim_scores[0][i]) for i in range(len(sim_scores[0]))]
+        return results
+
     # Run cosine similarity for each query
-    cosine_scores = [
-        cosine_similarity(query, inverted_index, idf, recipe_norms) for query in queries
-    ]
+    cosine_scores = [cos_sim(query) for query in queries]
 
     top_recipes = common_recipes(cosine_scores)
     # Filter out recipes based on dietary restrictions
