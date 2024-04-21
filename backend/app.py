@@ -6,6 +6,9 @@ import numpy as np
 import pandas as pd
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
+from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 # ROOT_PATH for linking with all your files.
 # Feel free to use a config.py or settings.py with a global export variable
@@ -28,20 +31,9 @@ app = Flask(__name__)
 CORS(app)
 
 
-idf_path = os.path.join(current_directory, "data/idf.json")
-inv_idx_path = os.path.join(current_directory, "data/inv_idx.json")
-recipe_norms_path = os.path.join(current_directory, "data/recipe_norms.json")
 id_to_recipe_path = os.path.join(current_directory, "data/id_to_recipe.json")
 svd_path = os.path.join(current_directory, "data/svd.json")
 
-with open(idf_path, "r") as f:
-    idf = json.load(f)
-
-with open(inv_idx_path, "r") as f:
-    inverted_index = json.load(f)
-
-with open(recipe_norms_path, "r") as f:
-    recipe_norms = {int(k): v for k, v in json.load(f).items()}
 
 with open(id_to_recipe_path, "r") as f:
     id_to_recipe = json.load(f)
@@ -49,15 +41,32 @@ with open(id_to_recipe_path, "r") as f:
 with open(svd_path, "r") as f:
     svd = json.load(f)
 
+corpus = []
+for _, recipe in id_to_recipe.items():
+    text = (
+        " ".join(recipe["ingredients"])
+        + " "
+        + recipe["description"]
+        + " "
+        + recipe["instructions"]
+    )
+    corpus.append(text)
+
+vectorizer = TfidfVectorizer(stop_words="english")
+tfidf_matrix = vectorizer.fit_transform(corpus)
+
+n_components = 150
+svd_model = TruncatedSVD(n_components=n_components)
+svd = svd_model.fit_transform(tfidf_matrix)
+
 
 def cosine_search(queries, dietary_restrictions):
     top_10_recipes, sim_scores = algorithm.algorithm(
         queries,
         dietary_restrictions,
-        inverted_index,
-        idf,
-        recipe_norms,
         id_to_recipe,
+        vectorizer,
+        svd_model,
         svd,
     )
 

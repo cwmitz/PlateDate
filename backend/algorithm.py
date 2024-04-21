@@ -1,57 +1,4 @@
-import data_processing
-import numpy as np
-from sklearn.decomposition import TruncatedSVD
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-
-
-def accumulate_dot_scores(query_set, inverted_index, idf):
-    """
-    Performs a term-at-a-time iteration to efficiently compute the numerator term
-    of the cosine similarity formula for each recipe.
-
-    Args:
-        query_set (set): The set of terms in the input query.
-        inverted_index (dict): The inverted index of the dataset.
-        idf (dict): The IDF of the dataset.
-
-    Returns:
-        dot_scores (dict): Mapping of recipe ID to the numerator term of the cosine similarity formula.
-    """
-    dot_scores = {}
-
-    for term in query_set:
-        if term in inverted_index:
-            for recipe_id in inverted_index[term]:
-                dot_scores[int(recipe_id)] = (
-                    dot_scores.get(int(recipe_id), 0) + idf[term]
-                )
-
-    return dot_scores
-
-
-def cosine_similarity_svd(query, vectorizer, svd_model, svd, id_to_recipe):
-    """
-    Computes the cosine similarity between the input query and each recipe in the dataset.
-
-    Args:
-        query (str): The input query to search for.
-        vectorizer (TfidfVectorizer): The TfidfVectorizer object used to transform the query.
-        svd_model (TruncatedSVD): The TruncatedSVD object used to transform the query.
-        svd (dict): The SVD transformation of the dataset.
-
-    Returns:
-        cosine_scores (list): List of (recipe ID, cosine similarity score) pairs.
-    """
-    query_vec = vectorizer.transform([query])
-    query_svd = svd_model.transform(query_vec)
-
-    sim_scores = cosine_similarity(query_svd, svd)
-
-    ids = list(id_to_recipe.keys())
-
-    results = [(ids[i], sim_scores[0][i]) for i in range(len(sim_scores[0]))]
-    return results
 
 
 def common_recipes(cosine_scores_all):
@@ -103,10 +50,9 @@ def get_sim_scores(top_recipes, cosine_scores_all, num_queries):
 def algorithm(
     queries,
     dietary_restrictions,
-    inverted_index,
-    idf,
-    recipe_norms,
     id_to_recipe,
+    vectorizer,
+    svd_model,
     svd,
 ):
     """
@@ -122,23 +68,6 @@ def algorithm(
     Returns:
         list: The top 10 recipes in common for all queries.
     """
-    corpus = []
-    for id, recipe in id_to_recipe.items():
-        text = (
-            " ".join(recipe["ingredients"])
-            + " "
-            + recipe["description"]
-            + " "
-            + recipe["instructions"]
-        )
-        corpus.append(text)
-
-    vectorizer = TfidfVectorizer(stop_words="english")
-    tfidf_matrix = vectorizer.fit_transform(corpus)
-
-    n_components = 150
-    svd_model = TruncatedSVD(n_components=n_components)
-    svd = svd_model.fit_transform(tfidf_matrix)
 
     def cos_sim(query):
         query_vec = vectorizer.transform([query])
