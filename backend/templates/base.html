@@ -203,7 +203,6 @@
                 fetch(`/recipes?${queryParams.toString()}`)
                     .then((response) => response.json())
                     .then((data) => {
-                        console.log(data);
                         displayRecipes(data)
                         titles = []
                     })
@@ -222,7 +221,6 @@
                 tempDiv.innerHTML = `
             <img src="${recipe.image}" alt="${recipe.name}" style="width: 100px; height: 100px; margin-right: 10px;">
             <h3><a href="${recipe.Url}" target="_blank">${recipe.name}</a></h3>
-            <p>${recipe.instructions}</p>
             <h4>Query Relevance</h4>
             <canvas id="pieChart-${index}" width="100" height="100"></canvas>
             <p>Rating: ${generateStars(recipe.aggregated_rating)}</p>
@@ -336,10 +334,8 @@
                 });
             } else if (sortOption === "Time (increasing)") {
                 recipeElements.sort((a, b) => {
-                    //console.log(a.getAttribute("data-total-time"));
                     const timeA = iso_to_min(a.getAttribute("data-total-time"));
                     const timeB = iso_to_min(b.getAttribute("data-total-time"));
-                    //console.log(timeA);
                     return timeA - timeB;
                 });
             } else if (sortOption === "Default") {
