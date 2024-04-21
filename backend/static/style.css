@@ -99,3 +99,7 @@ input[type="checkbox"] {
   cursor: pointer;
   transform: scale(1.2);
 }
+
+.body-font {
+  font-family: "Montserrat", sans-serif;
+}

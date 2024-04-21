@@ -7,7 +7,7 @@
     rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 
-<body style="background-color: #e6baa3">
+<body style="background-color: #e6baa3" class="body-font">
     <div class="full-body-container">
         <div class="title-font">
             <h1 id="title">PlateDate</h1>
@@ -263,7 +263,7 @@
                                     const query = titles[tooltipItem.dataIndex]
                                     const score = tooltipItem.raw
                                     const totalScore = similarityScores.reduce((a, b) => a + b, 0);
-                                    const percentage = ((score / totalScore) * 100).toFixed(2);
+                                    const percentage = ((score / totalScore) * 100);
                                     return [
                                         `${query ? `"${query}"` : "Unknown Query"}`,
                                         `${percentage}%`,
