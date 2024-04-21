@@ -32,14 +32,10 @@ CORS(app)
 
 
 id_to_recipe_path = os.path.join(current_directory, "data/id_to_recipe.json")
-svd_path = os.path.join(current_directory, "data/svd.json")
 
 
 with open(id_to_recipe_path, "r") as f:
     id_to_recipe = json.load(f)
-
-with open(svd_path, "r") as f:
-    svd = json.load(f)
 
 corpus = []
 for _, recipe in id_to_recipe.items():
