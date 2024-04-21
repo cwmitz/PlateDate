@@ -1,7 +1,5 @@
 import data_processing
 import numpy as np
-from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
 
 
 def accumulate_dot_scores(query_set, inverted_index, idf):
@@ -59,8 +57,7 @@ def cosine_similarity(query, inverted_index, idf, recipe_norms):
     cosine_scores = []
     for recipe_id, dot_score in dot_scores.items():
         cosine_scores.append(
-            (int(recipe_id), dot_score /
-             (query_norm * recipe_norms[int(recipe_id)]))
+            (int(recipe_id), dot_score / (query_norm * recipe_norms[int(recipe_id)]))
         )
 
     return cosine_scores
@@ -88,8 +85,7 @@ def common_recipes(cosine_scores_all):
             else:
                 accumulated_ranks[recipe_id] = score
     # Sort the accumulated ranks in increasing order
-    top_recipes = sorted(accumulated_ranks.items(),
-                         key=lambda x: x[1], reverse=True)
+    top_recipes = sorted(accumulated_ranks.items(), key=lambda x: x[1], reverse=True)
 
     return top_recipes
 
@@ -113,31 +109,37 @@ def get_sim_scores(top_recipes, cosine_scores_all, num_queries):
     return scores
 
 
-def iso_to_min(iso_time):
-    """
-    Converts ISO 8601 formatted time to minutes.
+# def iso_to_min(iso_time):
+#     """
+#     Converts ISO 8601 formatted time to minutes.
 
-    Args:
-        iso_time (str): The time in ISO 8601 format.
+#     Args:
+#         iso_time (str): The time in ISO 8601 format.
 
-    Returns:
-        int: The time in minutes.
-    """
-    if iso_to_min == "PT0S":
-        return 0
-    total_minutes = 0
-    iso_time = iso_time[2:]
-    if "H" in iso_time:
-        total_minutes += int(iso_time.split("H")[0]) * 60
-        h_idx = iso_time.index('H')
-        iso_time = iso_time[h_idx+1:]
-    if "M" in iso_time:
-        total_minutes += int(iso_time.split("M")[0])
-    return total_minutes
+#     Returns:
+#         int: The time in minutes.
+#     """
+#     if iso_to_min == "PT0S":
+#         return 0
+#     total_minutes = 0
+#     iso_time = iso_time[2:]
+#     if "H" in iso_time:
+#         total_minutes += int(iso_time.split("H")[0]) * 60
+#         h_idx = iso_time.index("H")
+#         iso_time = iso_time[h_idx + 1 :]
+#     if "M" in iso_time:
+#         total_minutes += int(iso_time.split("M")[0])
+#     return total_minutes
 
 
 def algorithm(
-    queries, dietary_restrictions, inverted_index, idf, recipe_norms, id_to_recipe, time_limit
+    queries,
+    dietary_restrictions,
+    inverted_index,
+    idf,
+    recipe_norms,
+    id_to_recipe,
+    time_limit,
 ):
     """
     Runs cosine similarity for each query and then calculates the most common
