@@ -1,5 +1,5 @@
+import recipe_parser as rp
 import re
-
 import numpy as np
 import recipe_parser
 from fuzzywuzzy import process, fuzz
@@ -44,10 +44,10 @@ def build_inverted_index(recipes):
         recipe_id = int(recipe["RecipeId"])
 
         tokens = set(
-            tokenize(recipe["Name"])
-            + tokenize(recipe["RecipeIngredientParts"][1:])
-            + tokenize(recipe["Keywords"][1:])
-            + tokenize(recipe["RecipeCategory"])
+            rp.tokenize(recipe["Name"])
+            + rp.tokenize(recipe["RecipeIngredientParts"][1:])
+            + rp.tokenize(recipe["Keywords"][1:])
+            + rp.tokenize(recipe["RecipeCategory"])
         )
 
         for token in tokens:

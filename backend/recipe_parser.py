@@ -144,6 +144,7 @@ def dietary_restrictions_check(recipe):
         "collagen",
         "elastin",
         "keratin",
+        "cheesy",
     }
     gluten_free_terms = {
         "wheat",
@@ -234,7 +235,8 @@ def dietary_restrictions_check(recipe):
         "condensed milk",
         "evaporated milk",
         "dulce de leche",
-        "milkfat"
+        "milkfat",
+        "cheesy",
     }
     nut_free_terms = {
         "almond",
