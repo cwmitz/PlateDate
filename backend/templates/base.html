@@ -216,37 +216,32 @@
                 createPieChart(recipe.similarity_scores, titles, index);
             });
         }
-
         function createPieChart(similarityScores, titles, chartIndex) {
+            const filteredData = similarityScores.reduce((acc, score, index) => {
+                if (score > 0) {
+                    acc.scores.push(score);
+                    acc.labels.push(`Query #${index + 1}`);
+                    acc.queries.push(titles[index]);
+                    acc.colors.push(getColorByIndex(index));
+                }
+                return acc;
+            }, { scores: [], labels: [], queries: [], colors: [] });
+
             const ctx = document
                 .getElementById(`pieChart-${chartIndex}`)
-                .getContext("2d")
+                .getContext("2d");
             const data = {
-                labels: similarityScores.map((_, i) => `Query #${i + 1}`),
+                labels: filteredData.labels,
                 datasets: [
                     {
                         label: "Similarity Score",
-                        data: similarityScores,
-                        backgroundColor: [
-                            "rgba(150, 111, 51, 1)",
-                            "rgba(205, 133, 63, 1)",
-                            "rgba(139, 69, 19, 1)",
-                            "rgba(222, 184, 135, 1)",
-                            "rgba(160, 82, 45, 1)",
-                            "rgba(210, 180, 140, 1)",
-                        ],
-                        borderColor: [
-                            "rgba(150, 111, 51, 1)",
-                            "rgba(205, 133, 63, 1)",
-                            "rgba(139, 69, 19, 1)",
-                            "rgba(222, 184, 135, 1)",
-                            "rgba(160, 82, 45, 1)",
-                            "rgba(210, 180, 140, 1)",
-                        ],
+                        data: filteredData.scores,
+                        backgroundColor: filteredData.colors,
+                        borderColor: filteredData.colors,
                         borderWidth: 1,
                     },
                 ],
-            }
+            };
 
             const config = {
                 type: "pie",
@@ -260,21 +255,33 @@
                         tooltip: {
                             callbacks: {
                                 label: function (tooltipItem) {
-                                    const query = titles[tooltipItem.dataIndex]
-                                    const score = tooltipItem.raw
-                                    const totalScore = similarityScores.reduce((a, b) => a + b, 0);
-                                    const percentage = ((score / totalScore) * 100);
+                                    const query = filteredData.queries[tooltipItem.dataIndex];
+                                    const score = tooltipItem.raw;
+                                    const totalScore = filteredData.scores.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.min(100, Math.max(0, Math.round((score / totalScore) * 100)));
                                     return [
                                         `${query ? `"${query}"` : "Unknown Query"}`,
                                         `${percentage}%`,
-                                    ]
+                                    ];
                                 },
                             },
                         },
                     },
                 },
-            }
-            new Chart(ctx, config)
+            };
+            new Chart(ctx, config);
+        }
+
+        function getColorByIndex(index) {
+            const colors = [
+                "rgba(150, 111, 51, 1)",
+                "rgba(205, 133, 63, 1)",
+                "rgba(139, 69, 19, 1)",
+                "rgba(222, 184, 135, 1)",
+                "rgba(160, 82, 45, 1)",
+                "rgba(210, 180, 140, 1)",
+            ];
+            return colors[index % colors.length];
         }
 
         function generateStars(rating) {
