@@ -194,13 +194,16 @@
                 tempDiv.style.border = "2px solid #B38770";
                 tempDiv.style.padding = "10px";
                 tempDiv.style.marginBottom = "20px";
+                tempDiv.style.textAlign = "center";
                 tempDiv.innerHTML = `
             <h3><a href="${recipe.Url}" target="_blank">${recipe.name}</a></h3>
-            <div style="display: flex; align-items: center;">
-                <img src="${recipe.image}" alt="${recipe.name}" style="width: 100px; height: 100px; margin-right: 10px;">
-                <div>
-                    <h4>Query Relevance</h4>
-                    <canvas id="pieChart-${index}" width="100" height="100"></canvas>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <img src="${recipe.image}" alt="${recipe.name}" style="width: 150px; height: 150px; margin-right: 10px;">
+                <div style="margin-left: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; margin-top: -22px;">
+                    <h4 style="margin-bottom: 13px;">Query Relevance</h4>
+                    <div style="position: relative;">
+                        <canvas id="pieChart-${index}" width="120" height="120"></canvas>
+                    </div>
                 </div>
             </div>
             <p>Rating: ${generateStars(recipe.aggregated_rating)}</p>
@@ -215,14 +218,20 @@
 
                 createPieChart(recipe.similarity_scores, titles, index);
             });
+
+            sortResults();
         }
+
         function createPieChart(similarityScores, titles, chartIndex) {
             const filteredData = similarityScores.reduce((acc, score, index) => {
                 if (score > 0) {
-                    acc.scores.push(score);
-                    acc.labels.push(`Query #${index + 1}`);
-                    acc.queries.push(titles[index]);
-                    acc.colors.push(getColorByIndex(index));
+                    const percentage = Math.min(100, Math.max(0, Math.round((score / similarityScores.reduce((a, b) => a + b, 0)) * 100)));
+                    if (percentage >= 1) {
+                        acc.scores.push(score);
+                        acc.labels.push(`Query #${index + 1}`);
+                        acc.queries.push(titles[index]);
+                        acc.colors.push(getColorByIndex(index));
+                    }
                 }
                 return acc;
             }, { scores: [], labels: [], queries: [], colors: [] });
@@ -274,12 +283,12 @@
 
         function getColorByIndex(index) {
             const colors = [
-                "rgba(150, 111, 51, 1)",
-                "rgba(205, 133, 63, 1)",
-                "rgba(139, 69, 19, 1)",
+                "rgba(165, 42, 42, 1)",
+                "rgba(128, 0, 0, 1)",
                 "rgba(222, 184, 135, 1)",
-                "rgba(160, 82, 45, 1)",
-                "rgba(210, 180, 140, 1)",
+                "rgba(255, 228, 196, 1)",
+                "rgba(233, 150, 122, 1)",
+                "rgba(188, 143, 143, 1)"
             ];
             return colors[index % colors.length];
         }
@@ -312,6 +321,8 @@
         function sortResults() {
             const sortOption = document.getElementById("sort-dropdown").value;
             const recipeElements = Array.from(document.getElementById("answer-box").children);
+            const searchInputs = document.querySelectorAll("#search-bars-container input");
+            const numQueries = Array.from(searchInputs).filter(input => input.value.trim() !== "").length;
 
             if (sortOption === "Rating") {
                 recipeElements.sort((a, b) => {
@@ -327,9 +338,32 @@
                 });
             } else if (sortOption === "Default") {
                 recipeElements.sort((a, b) => {
-                    const indexA = parseInt(a.getAttribute("data-original-index"));
-                    const indexB = parseInt(b.getAttribute("data-original-index"));
-                    return indexA - indexB;
+                    const pieChartA = a.querySelector(`canvas`);
+                    const pieChartB = b.querySelector(`canvas`);
+                    const chartA = Chart.getChart(pieChartA);
+                    const chartB = Chart.getChart(pieChartB);
+
+                    const numQueriesA = chartA.data.datasets[0].data.filter(score => score > 0).length;
+                    const numQueriesB = chartB.data.datasets[0].data.filter(score => score > 0).length;
+
+                    if (numQueriesA !== numQueriesB) {
+                        return numQueriesB - numQueriesA;
+                    } else {
+                        const idealPercentage = 100 / numQueries;
+                        const percentagesA = chartA.data.datasets[0].data.map(score => (score / chartA.data.datasets[0].data.reduce((a, b) => a + b, 0)) * 100);
+                        const percentagesB = chartB.data.datasets[0].data.map(score => (score / chartB.data.datasets[0].data.reduce((a, b) => a + b, 0)) * 100);
+
+                        const deviationA = percentagesA.reduce((sum, percentage) => sum + Math.abs(percentage - idealPercentage), 0);
+                        const deviationB = percentagesB.reduce((sum, percentage) => sum + Math.abs(percentage - idealPercentage), 0);
+
+                        if (deviationA !== deviationB) {
+                            return deviationA - deviationB;
+                        } else {
+                            const totalScoreA = chartA.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            const totalScoreB = chartB.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            return totalScoreB - totalScoreA;
+                        }
+                    }
                 });
             }
 
