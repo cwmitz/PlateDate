@@ -2,13 +2,12 @@ import json
 import os
 
 import algorithm
-import numpy as np
 import pandas as pd
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
+from fuzzywuzzy import fuzz, process
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 
 # ROOT_PATH for linking with all your files.
 # Feel free to use a config.py or settings.py with a global export variable
@@ -30,12 +29,15 @@ df = pd.json_normalize(recipes_list)
 app = Flask(__name__)
 CORS(app)
 
-
 id_to_recipe_path = os.path.join(current_directory, "data/id_to_recipe.json")
+inverted_index_path = os.path.join(current_directory, "data/inv_idx.json")
 
 
 with open(id_to_recipe_path, "r") as f:
     id_to_recipe = json.load(f)
+
+with open(inverted_index_path, "r") as f:
+    inverted_index = json.load(f)
 
 corpus = []
 for _, recipe in id_to_recipe.items():
@@ -48,6 +50,7 @@ for _, recipe in id_to_recipe.items():
     )
     corpus.append(text)
 
+
 vectorizer = TfidfVectorizer(stop_words="english")
 tfidf_matrix = vectorizer.fit_transform(corpus)
 
@@ -57,8 +60,24 @@ svd = svd_model.fit_transform(tfidf_matrix)
 
 
 def cosine_search(queries, dietary_restrictions):
+    # Preprocess each query to find the closest match in the corpus
+    preprocessed_queries = []
+    for query in queries:
+        tokens = query.split()
+        corrected_tokens = []
+        for token in tokens:
+            if token not in inverted_index:
+                corrected_token = process.extractOne(
+                    token, inverted_index.keys(), scorer=fuzz.ratio
+                )
+                if corrected_token and corrected_token[1] >= 80:
+                    corrected_tokens.append(corrected_token[0])
+            else:
+                corrected_tokens.append(token)
+        preprocessed_queries.append(" ".join(corrected_tokens))
+
     top_10_recipes, sim_scores = algorithm.algorithm(
-        queries,
+        preprocessed_queries,
         dietary_restrictions,
         id_to_recipe,
         vectorizer,
@@ -75,7 +94,6 @@ def cosine_search(queries, dietary_restrictions):
             "aggregated_rating": id_to_recipe[str(recipe_id)]["aggregated_rating"],
             "image": id_to_recipe[str(recipe_id)]["image"],
             "Url": id_to_recipe[str(recipe_id)]["Url"],
-            # Include total_time
             "total_time": id_to_recipe[str(recipe_id)].get("total_time", "PT0M"),
             "similarity_scores": sim_scores[recipe_id],
         }
