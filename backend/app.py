@@ -1,5 +1,6 @@
 import json
 import os
+import pickle
 
 import algorithm
 import pandas as pd
@@ -39,24 +40,18 @@ with open(id_to_recipe_path, "r") as f:
 with open(inverted_index_path, "r") as f:
     inverted_index = json.load(f)
 
-corpus = []
-for _, recipe in id_to_recipe.items():
-    text = (
-        " ".join(recipe["ingredients"])
-        + " "
-        + recipe["description"]
-        + " "
-        + recipe["instructions"]
-    )
-    corpus.append(text)
 
+### SVD PREPROCESSING ###
+with open("data/svd_model.pkl", "rb") as f:
+    svd_model = pickle.load(f)
 
-vectorizer = TfidfVectorizer(stop_words="english")
-tfidf_matrix = vectorizer.fit_transform(corpus)
+with open("data/tfidf_vectorizer.pkl", "rb") as f:
+    vectorizer = pickle.load(f)
 
-n_components = 150
-svd_model = TruncatedSVD(n_components=n_components)
-svd = svd_model.fit_transform(tfidf_matrix)
+with open("data/svd.pkl", "rb") as f:
+    svd = pickle.load(f)
+
+#######################
 
 
 def cosine_search(queries, dietary_restrictions):
